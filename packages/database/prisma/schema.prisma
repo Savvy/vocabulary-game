@@ -1,0 +1,45 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Word {
+    id          String   @id @default(cuid())
+    word        String
+    translation String
+    imageUrl    String?
+    category    Category @relation(fields: [categoryId], references: [id])
+    categoryId  String
+    language    Language @relation(fields: [languageId], references: [id])
+    languageId  String
+    options     String[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([categoryId])
+    @@index([languageId])
+}
+
+model Category {
+    id          String   @id @default(cuid())
+    name        String
+    description String?
+    words       Word[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([name])
+}
+
+model Language {
+    id        String   @id @default(cuid())
+    code      String   @unique // e.g., "en", "es"
+    name      String // e.g., "English", "Spanish"
+    words     Word[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

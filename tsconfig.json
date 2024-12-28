@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "target": "es2017",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
       "@vocab/*": ["packages/*/src"]
