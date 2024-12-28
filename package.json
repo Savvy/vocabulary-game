@@ -1,0 +1,29 @@
+{
+  "name": "vocabulary-game",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "Malcom <git@malcom.sh>",
+  "license": "ISC",
+  "packageManager": "pnpm@8.15.0",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.11",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
