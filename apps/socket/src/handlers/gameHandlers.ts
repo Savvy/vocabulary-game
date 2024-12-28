@@ -235,20 +235,26 @@ function startTurnTimer(room: GameRoom, io: Server) {
 }
 
 function moveToNextTurn(room: GameRoom, io: Server) {
-    if (!room.currentTurn) return;
+    if (!room.currentTurn || room.players.length === 0) return;
 
     const currentPlayerIndex = room.players.findIndex(p => p.id === room.currentTurn);
-    const nextPlayerIndex = (currentPlayerIndex + 1) % room.players.length;
-    console.log('Current player index:', currentPlayerIndex);
-    console.log('Next player index:', nextPlayerIndex);
+    
+    // Handle case where current player is not found
+    if (currentPlayerIndex === -1) {
+        room.currentTurn = room.players[0].id;
+    } else {
+        const nextPlayerIndex = (currentPlayerIndex + 1) % room.players.length;
+        room.currentTurn = room.players[nextPlayerIndex].id;
+    }
 
-    room.currentTurn = room.players[nextPlayerIndex].id;
+    // Reset turn state
     room.timeRemaining = 30;
     room.currentAttempts = 0;
     room.currentWord = undefined;
     room.category = undefined;
 
-    if (nextPlayerIndex === 0) {
+    // Check if we've completed a round
+    if (currentPlayerIndex === room.players.length - 1) {
         room.currentRound++;
         if (room.currentRound > room.maxRounds) {
             room.status = 'finished';
