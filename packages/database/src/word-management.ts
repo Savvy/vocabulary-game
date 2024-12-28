@@ -45,8 +45,9 @@ export async function getRandomWordsByCategory(
             language: true,
         },
     });
+    console.log('Words from database:', words);
 
-    return words.sort(() => Math.random() - 0.5);
+    return words.length > 0 ? words.sort(() => Math.random() - 0.5) : words;
 }
 
 export async function getAllCategories() {

@@ -36,7 +36,9 @@ export function setupGameHandlers(
                     status: 'waiting',
                     currentRound: 0,
                     maxRounds: 10,
-                    answers: new Map()
+                    answers: new Map(),
+                    maxAttempts: 3,
+                    currentAttempts: 0
                 };
                 gameRooms.set(player.roomId, room);
             }
@@ -67,7 +69,9 @@ export function setupGameHandlers(
                 currentRound: room.currentRound,
                 maxRounds: room.maxRounds,
                 currentWord: room.currentWord,
-                category: room.category
+                category: room.category,
+                maxAttempts: room.maxAttempts || 3,
+                currentAttempts: room.currentAttempts || 0
             });
 
             console.log(`Player ${player.nickname} joined room ${player.roomId}`);
@@ -86,11 +90,16 @@ export function setupGameHandlers(
         if (!room) return;
 
         room.status = 'playing';
+        room.currentRound = 1;
+        room.currentTurn = room.players[0].id; // Start with first player
+        room.maxAttempts = 3;
+        room.currentAttempts = 0;
+        room.timeRemaining = 30; // 30 seconds per turn
 
-        io.to(player.roomId).emit('game:state', {
-            ...room,
-            status: 'playing'
-        });
+        io.to(player.roomId).emit('game:state', room);
+
+        // Start turn timer
+        startTurnTimer(room, io);
     });
 
     socket.on('game:spinWheel', async () => {
@@ -114,9 +123,11 @@ export function setupGameHandlers(
                 return;
             }
 
+            console.log('Selected category:', selectedCategory);
+
             // Get words for the selected category
             const words = await getRandomWordsByCategory(selectedCategory.id, 'en', 1);
-
+            console.log('Words:', words);
             if (words && words.length > 0) {
                 const word = words[0];
                 room.currentWord = {
@@ -146,40 +157,23 @@ export function setupGameHandlers(
         if (!player) return;
 
         const room = gameRooms.get(player.roomId);
-        if (!room || !room.currentWord) return;
+        if (!room || !room.currentWord || player.id !== room.currentTurn) return;
 
-        const isCorrect = answer === room.currentWord.translation;
-        const currentAnswers = room.answers || new Map<string, boolean>();
+        const isCorrect = answer.toLowerCase() === room.currentWord.translation.toLowerCase();
+        room.currentAttempts++;
 
-        // Record this player's answer
-        currentAnswers.set(player.id, isCorrect);
-        room.answers = currentAnswers;
-
-        // If everyone has answered, calculate scores
-        if (currentAnswers.size === room.players.length) {
-            const correctPlayers = Array.from(currentAnswers.entries())
-                .filter(([_, correct]) => correct)
-                .map(([playerId]) => playerId);
-
-            const scores: Record<string, number> = {};
-
-            // Assign points based on order
-            correctPlayers.forEach((playerId, index) => {
-                scores[playerId] = index === 0 ? 3 : index === 1 ? 2 : 1;
-            });
-
-            // Update player scores
-            room.players.forEach(p => {
-                p.score += scores[p.id] || 0;
-            });
-
-            // Clear answers for next round
-            room.answers = new Map();
-
-            // Emit scores and round end
-            io.to(room.roomId).emit('game:roundEnd', scores);
-            io.to(room.roomId).emit('game:state', room);
+        if (isCorrect) {
+            // Award points based on attempts
+            const points = Math.max(4 - room.currentAttempts, 1); // 3 points for first try, 2 for second, 1 for third
+            player.score += points;
+            
+            io.to(room.roomId).emit('game:roundEnd', { [player.id]: points });
+            moveToNextTurn(room, io);
+        } else if (room.currentAttempts >= room.maxAttempts) {
+            moveToNextTurn(room, io);
         }
+
+        io.to(room.roomId).emit('game:state', room);
     });
 
     socket.on('disconnect', () => {
@@ -223,4 +217,43 @@ function findPlayerBySocketId(
         if (player) return player;
     }
     return null;
+}
+
+function startTurnTimer(room: GameRoom, io: Server) {
+    const timer = setInterval(() => {
+        if (!room.timeRemaining || room.timeRemaining <= 0) {
+            clearInterval(timer);
+            moveToNextTurn(room, io);
+            return;
+        }
+        
+        room.timeRemaining--;
+        io.to(room.roomId).emit('game:state', room);
+    }, 1000);
+
+    return timer;
+}
+
+function moveToNextTurn(room: GameRoom, io: Server) {
+    if (!room.currentTurn) return;
+
+    const currentPlayerIndex = room.players.findIndex(p => p.id === room.currentTurn);
+    const nextPlayerIndex = (currentPlayerIndex + 1) % room.players.length;
+    console.log('Current player index:', currentPlayerIndex);
+    console.log('Next player index:', nextPlayerIndex);
+
+    room.currentTurn = room.players[nextPlayerIndex].id;
+    room.timeRemaining = 30;
+    room.currentAttempts = 0;
+    room.currentWord = undefined;
+    room.category = undefined;
+
+    if (nextPlayerIndex === 0) {
+        room.currentRound++;
+        if (room.currentRound > room.maxRounds) {
+            room.status = 'finished';
+        }
+    }
+
+    io.to(room.roomId).emit('game:state', room);
 } 

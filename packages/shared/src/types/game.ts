@@ -15,6 +15,10 @@ export type GameState = {
     roundStartTime?: number;
     currentRound: number;
     maxRounds: number;
+    currentTurn?: string;
+    timeRemaining?: number;
+    maxAttempts: number;
+    currentAttempts: number;
 };
 
 export type Word = {
