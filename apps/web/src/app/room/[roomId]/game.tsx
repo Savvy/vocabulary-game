@@ -8,11 +8,14 @@ import { useSocket } from '@/hooks/useSocket';
 import { Player } from '@vocab/shared';
 import { RouletteWheel } from '@/components/RouletteWheel';
 import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function TimeAttackGame() {
     const { socket } = useSocket();
     const { state } = useGame();
     const isCurrentTurn = socket?.id === state.currentTurn;
+    const [lastAnswer, setLastAnswer] = useState<{ text: string; isCorrect: boolean | null }>({ text: '', isCorrect: null });
 
     const handleSpinComplete = () => {
         if (socket?.connected) {
@@ -21,7 +24,20 @@ export function TimeAttackGame() {
     };
 
     const handleAnswer = (answer: string) => {
+        setLastAnswer({ text: answer, isCorrect: null });
         socket?.emit('game:answer', answer);
+        
+        // Check if answer is correct
+        if (state.currentWord && answer.toLowerCase() === state.currentWord.translation.toLowerCase()) {
+            setLastAnswer(prev => ({ ...prev, isCorrect: true }));
+        } else {
+            setLastAnswer(prev => ({ ...prev, isCorrect: false }));
+        }
+
+        // Reset feedback after 1.5s
+        setTimeout(() => {
+            setLastAnswer({ text: '', isCorrect: null });
+        }, 1500);
     };
 
     const handleStartTurn = () => {
@@ -82,6 +98,21 @@ export function TimeAttackGame() {
                         )}
                     </div>
 
+                    <AnimatePresence mode="wait">
+                        {lastAnswer.isCorrect !== null && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className={`text-center mb-4 font-semibold ${
+                                    lastAnswer.isCorrect ? 'text-green-500' : 'text-red-500'
+                                }`}
+                            >
+                                {lastAnswer.isCorrect ? 'Correct!' : 'Try again!'}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <form onSubmit={(e) => {
                         e.preventDefault();
                         const input = e.currentTarget.elements.namedItem('answer') as HTMLInputElement;
@@ -96,8 +127,11 @@ export function TimeAttackGame() {
                             className="flex-1"
                             autoComplete="off"
                             autoFocus
+                            disabled={!isCurrentTurn}
                         />
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit" disabled={!isCurrentTurn}>
+                            Submit
+                        </Button>
                     </form>
                 </Card>
             )}
@@ -109,7 +143,9 @@ export function TimeAttackGame() {
                     {state.players.map((player: Player) => (
                         <div 
                             key={player.id} 
-                            className="flex justify-between items-center"
+                            className={`flex justify-between items-center p-2 rounded ${
+                                player.id === state.currentTurn ? 'bg-secondary' : ''
+                            }`}
                         >
                             <span>{player.nickname}</span>
                             <span className="font-mono">

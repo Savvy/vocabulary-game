@@ -114,23 +114,21 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         if (!this.state.wordsAnswered[playerId]) {
             this.state.wordsAnswered[playerId] = { correct: 0, total: 0 };
         }
+        this.state.wordsAnswered[playerId].total++;
         
         if (isCorrect) {
             this.state.wordsAnswered[playerId].correct++;
             this.state.scores[playerId] = (this.state.scores[playerId] || 0) + this.config.scoreSystem.basePoints;
-        }
-        
-        this.state.wordsAnswered[playerId].total++;
-        
-        // Move to next word if available
-        this.state.currentWord = this.wordQueue.shift();
+            
+            // Only move to next word if answer was correct
+            this.state.currentWord = this.wordQueue.shift();
 
-        // End turn if no more words
-        if (!this.state.currentWord) {
-            this.endPlayerTurn(playerId);
-            return;
+            // End turn if no more words
+            if (!this.state.currentWord) {
+                this.endPlayerTurn(playerId);
+                return;
+            }
         }
-
         this.onStateChange?.(this.state);
     }
 
