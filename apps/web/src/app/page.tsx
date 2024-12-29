@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useGame } from '@/contexts/GameContext'
 import { useToast } from '@/hooks/use-toast'
+import { useSocket } from '@/hooks/useSocket'
 
 export default function Home() {
   const [nickname, setNickname] = useState('')
@@ -15,6 +16,7 @@ export default function Home() {
   const { joinGame } = useGame()
   const { toast } = useToast()
   const router = useRouter()
+  const { socket } = useSocket()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,21 +30,33 @@ export default function Home() {
     }
 
     try {
-      joinGame(nickname, roomId || undefined)
-
-      // Add loading state
       const loadingToast = toast({
         title: "Joining game...",
         description: "Please wait while we connect you to the game",
       })
 
-      // Wait for socket connection and game join
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Create a promise that resolves when we get the roomId
+      const roomPromise = new Promise<string>((resolve) => {
+        if (roomId) {
+          resolve(roomId)
+        } else {
+          console.log('Waiting for room creation')
+          const handleRoomCreated = (newRoomId: string) => {
+            console.log('Room created:', newRoomId)
+            resolve(newRoomId)
+          }
+          socket?.once('game:roomCreated', handleRoomCreated)
+        }
+      })
+      
+      // Join the game
+      joinGame(nickname, roomId || undefined)
 
+      // Wait for the roomId
+      const targetRoomId = await roomPromise
       loadingToast.dismiss()
-      router.push(roomId ? `/room/${roomId}` : '/room/new')
-    } catch (error) {
-      console.error('Error joining game:', error)
+      router.push(`/room/${targetRoomId}`)
+    } catch {
       toast({
         variant: "destructive",
         title: "Failed to join game",

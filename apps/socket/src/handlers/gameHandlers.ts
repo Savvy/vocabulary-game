@@ -41,6 +41,8 @@ export function setupGameHandlers(
                     currentAttempts: 0
                 };
                 gameRooms.set(player.roomId, room);
+                // Emit the new roomId to the client
+                socket.emit('game:roomCreated', player.roomId);
             }
 
             // Leave any existing rooms first
@@ -83,23 +85,36 @@ export function setupGameHandlers(
 
     // Add other game event handlers here
     socket.on('game:startGame', async () => {
-        const player = findPlayerBySocketId(socket.id, gameRooms);
-        if (!player || !player.isHost) return;
+        console.log('[Server] Received game:startGame event')
+        const player = findPlayerBySocketId(socket.id, gameRooms)
+        if (!player || !player.isHost) {
+            console.log('[Server] Player not authorized:', { playerId: socket.id, isHost: player?.isHost })
+            return
+        }
 
-        const room = gameRooms.get(player.roomId);
-        if (!room) return;
+        const room = gameRooms.get(player.roomId)
+        if (!room) {
+            console.log('[Server] Room not found:', player.roomId)
+            return
+        }
 
-        room.status = 'playing';
-        room.currentRound = 1;
-        room.currentTurn = room.players[0].id; // Start with first player
-        room.maxAttempts = 3;
-        room.currentAttempts = 0;
-        room.timeRemaining = 30; // 30 seconds per turn
-
-        io.to(player.roomId).emit('game:state', room);
-
-        // Start turn timer
-        startTurnTimer(room, io);
+        const updatedRoom: GameRoom = {
+            ...room,
+            status: 'playing',
+            currentRound: 1,
+            currentTurn: room.players[0].id,
+            maxAttempts: 3,
+            currentAttempts: 0,
+            timeRemaining: 30
+        }
+        
+        gameRooms.set(player.roomId, updatedRoom)
+        console.log('[Server] Emitting game:state:', {
+            roomId: updatedRoom.roomId,
+            status: updatedRoom.status,
+            recipients: io.sockets.adapter.rooms.get(player.roomId)?.size
+        })
+        io.to(player.roomId).emit('game:state', updatedRoom)
     });
 
     socket.on('game:spinWheel', async () => {

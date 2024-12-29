@@ -39,6 +39,7 @@ export type ServerToClientEvents = {
     'game:roundStart': (word: Word) => void;
     'game:roundEnd': (scores: Record<string, number>) => void;
     'game:wheelSpun': (category: string) => void;
+    'game:roomCreated': (roomId: string) => void;
     'game:error': (message: string) => void;
 };
 

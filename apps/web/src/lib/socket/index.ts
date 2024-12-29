@@ -6,23 +6,23 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 export const initializeSocket = () => {
     if (!socket) {
         socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000', {
-            autoConnect: false,
+            autoConnect: true,
             reconnection: true,
-            reconnectionAttempts: 5,
+            reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
+            timeout: 10000
         });
 
-        // Add global event listeners
         socket.on('connect', () => {
-            console.log('Connected to game server');
+            console.log('[Socket] Connected to game server');
         });
 
         socket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
+            console.error('[Socket] Connection error:', error);
         });
 
-        socket.on('game:error', (message) => {
-            console.error('Game error:', message);
+        socket.on('disconnect', (reason) => {
+            console.log('[Socket] Disconnected:', reason);
         });
     }
 
@@ -31,7 +31,7 @@ export const initializeSocket = () => {
 
 export const getSocket = () => {
     if (!socket) {
-        throw new Error('Socket not initialized. Call initializeSocket first.');
+        return initializeSocket();
     }
     return socket;
 };

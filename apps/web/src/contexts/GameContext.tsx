@@ -30,12 +30,29 @@ type GameAction =
     | { type: 'REMOVE_PLAYER'; payload: string }
     | { type: 'SET_WORD'; payload: Word }
     | { type: 'SET_CATEGORY'; payload: string }
-    | { type: 'UPDATE_SCORES'; payload: Record<string, number> };
+    | { type: 'UPDATE_SCORES'; payload: Record<string, number> }
+    | { type: 'SET_ROOM_ID'; payload: string };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
     switch (action.type) {
         case 'SET_STATE':
-            return action.payload;
+            console.log('[GameReducer] Processing SET_STATE:', {
+                oldStatus: state.status,
+                newStatus: action.payload.status
+            });
+            return {
+                roomId: action.payload.roomId || state.roomId,
+                players: action.payload.players || [],
+                status: action.payload.status || state.status,
+                currentRound: action.payload.currentRound ?? state.currentRound,
+                maxRounds: action.payload.maxRounds ?? state.maxRounds,
+                currentWord: action.payload.currentWord,
+                category: action.payload.category,
+                maxAttempts: action.payload.maxAttempts ?? state.maxAttempts,
+                currentAttempts: action.payload.currentAttempts ?? state.currentAttempts,
+                timeRemaining: action.payload.timeRemaining,
+                currentTurn: action.payload.currentTurn
+            };
         case 'ADD_PLAYER':
             return {
                 ...state,
@@ -64,6 +81,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                     score: action.payload[player.id] || player.score,
                 })),
             };
+        case 'SET_ROOM_ID':
+            return {
+                ...state,
+                roomId: action.payload,
+            };
         default:
             return state;
     }
@@ -74,20 +96,47 @@ const GameContext = createContext<GameContextType>({} as GameContextType);
 export function GameProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(gameReducer, initialState);
     const { toast } = useToast();
-    const socket = useSocket();
+    const { socket } = useSocket();
+
+    useEffect(() => {
+        if (!socket) {
+            console.log('[GameContext] Socket not connected');
+            return;
+        }
+
+        socket.on('connect', () => {
+            console.log('[Socket] Connected with ID:', socket.id);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('[Socket] Disconnected');
+        });
+
+        const handleGameState = (newState: GameState) => {
+            console.log('[Client] Received game:state:', { 
+                socketId: socket.id,
+                roomId: newState.roomId,
+                status: newState.status,
+                players: newState.players?.length
+            });
+            dispatch({ type: 'SET_STATE', payload: newState });
+        };
+        socket.on('game:state', handleGameState);
+        
+        return () => {
+            socket.off('connect');
+            socket.off('disconnect');
+            socket.off('game:state', handleGameState);
+        };
+    }, [socket]);
 
     useEffect(() => {
         if (!socket) return;
 
-        // Handle game state updates
-        socket.on('game:state', (newState) => {
-            dispatch({ type: 'SET_STATE', payload: newState });
-        });
-
         // Handle player joined
         socket.on('game:playerJoined', (player) => {
             dispatch({ type: 'ADD_PLAYER', payload: player });
-            toast({
+            toast({ 
                 title: "Player Joined",
                 description: `${player.nickname} joined the game`,
             });
@@ -113,15 +162,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             dispatch({ type: 'UPDATE_SCORES', payload: scores });
         });
 
+        // Add new room created handler
+        socket.on('game:roomCreated', (roomId: string) => {
+            dispatch({ type: 'SET_ROOM_ID', payload: roomId });
+        });
+
         return () => {
-            socket.off('game:state');
             socket.off('game:playerJoined');
             socket.off('game:playerLeft');
             socket.off('game:roundStart');
             socket.off('game:wheelSpun');
             socket.off('game:roundEnd');
+            socket.off('game:roomCreated');
         };
-    }, [socket, toast]);
+    }, [socket]);
 
     // Actions
     const joinGame = useCallback((nickname: string, roomId?: string) => {
@@ -151,7 +205,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }, [socket]);
 
     const startGame = useCallback(() => {
-        if (!socket) return;
+        if (!socket) {
+            console.log('Socket not connected');
+            return;
+        }
+        console.log('Emitting game:startGame event');
         socket.emit('game:startGame');
     }, [socket]);
 

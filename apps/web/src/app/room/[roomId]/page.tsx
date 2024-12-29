@@ -7,14 +7,20 @@ import { Button } from '@/components/ui/button'
 import { ScoreBoard } from '@/components/ScoreBoard'
 import { Player } from '@vocab/shared'
 import { GameArea } from '@/components/GameArea'
+import { useSocket } from '@/hooks/useSocket'
 
 export default function GameRoom() {
     /* const { roomId } = useParams() */
+    const { socket } = useSocket()
     const { state, startGame } = useGame()
-    const isHost = state.players.find((p: Player) => p.isHost)?.id === state.players[0]?.id
+    const isHost = state.players.find((p: Player) => p.id === socket?.id)?.isHost || false;
 
     const handleStartGame = () => {
-        if (!isHost) return;
+        if (!isHost) {
+            console.log('Not host, cannot start game')
+            return
+        }
+        console.log('Starting game as host')
         startGame()
     }
 
