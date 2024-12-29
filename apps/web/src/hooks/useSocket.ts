@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '@vocab/shared';
 import { useToast } from './use-toast';
@@ -7,22 +7,21 @@ import { initializeSocket } from '@/lib/socket';
 export function useSocket() {
     const { toast } = useToast();
     const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
-    const [isConnected, setIsConnected] = useState(false);
+
+    // Initialize socket immediately, not in useEffect
+    if (!socketRef.current) {
+        socketRef.current = initializeSocket();
+    }
 
     useEffect(() => {
-        if (!socketRef.current) {
-            socketRef.current = initializeSocket();
-        }
-
         const socket = socketRef.current;
+        if (!socket) return;
 
         function onConnect() {
-            setIsConnected(true);
-            console.log('[Socket] Connected with ID:', socket.id);
+            console.log('[Socket] Connected with ID:', socket?.id);
         }
 
         function onDisconnect(reason: string) {
-            setIsConnected(false);
             console.log('[Socket] Disconnected:', reason);
             toast({
                 title: "Connection Lost",
@@ -55,5 +54,5 @@ export function useSocket() {
         };
     }, [toast]);
 
-    return { socket: socketRef.current, isConnected };
+    return { socket: socketRef.current, isConnected: socketRef.current?.connected };
 } 

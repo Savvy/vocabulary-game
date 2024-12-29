@@ -177,6 +177,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         };
     }, [socket]);
 
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('game:error', (message) => {
+            toast({
+                variant: "destructive",
+                title: "Game Error",
+                description: message,
+            });
+        });
+
+        return () => {
+            socket.off('game:error');
+        };
+    }, [socket, toast]);
+
     // Actions
     const joinGame = useCallback((nickname: string, roomId?: string) => {
         if (!socket) return;

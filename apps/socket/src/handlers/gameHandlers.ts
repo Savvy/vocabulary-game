@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import {
     ClientToServerEvents,
     ServerToClientEvents,
-    GameState,
     Player
 } from '@vocab/shared';
 import { GameRoom } from '../types/GameRoom';
@@ -16,23 +15,29 @@ export function setupGameHandlers(
 ) {
     socket.on('game:join', ({ nickname, roomId }) => {
         try {
+            const targetRoomId = roomId || uuidv4();
+            const room = gameRooms.get(targetRoomId);
+
+            // Check for duplicate nicknames only if the room exists
+            if (room?.players?.some(p => p.nickname.toLowerCase() === nickname.toLowerCase())) {
+                socket.emit('game:error', 'Nickname already taken in this room');
+                return;
+            }
+
             // Create player object
             const player: Player = {
                 id: socket.id,
                 nickname,
                 score: 0,
-                roomId: roomId || uuidv4(),
-                isHost: false
+                roomId: targetRoomId,
+                isHost: !room // Player is host if room doesn't exist
             };
-
-            let room = gameRooms.get(player.roomId);
 
             // Create new room if it doesn't exist
             if (!room) {
-                player.isHost = true;
-                room = {
-                    roomId: player.roomId,
-                    players: [],
+                const newRoom: GameRoom = {
+                    roomId: targetRoomId,
+                    players: [player], // Initialize with the first player
                     status: 'waiting',
                     currentRound: 0,
                     maxRounds: 10,
@@ -40,43 +45,32 @@ export function setupGameHandlers(
                     maxAttempts: 3,
                     currentAttempts: 0
                 };
-                gameRooms.set(player.roomId, room);
-                // Emit the new roomId to the client
-                socket.emit('game:roomCreated', player.roomId);
+                gameRooms.set(targetRoomId, newRoom);
+                socket.emit('game:roomCreated', targetRoomId);
+                
+                // Join the room
+                socket.join(targetRoomId);
+                
+                // Send initial game state
+                socket.emit('game:state', newRoom);
+                return;
             }
 
-            // Leave any existing rooms first
-            socket.rooms.forEach(roomId => {
-                if (roomId !== socket.id) {
-                    socket.leave(roomId);
-                }
-            });
-
-            // Join the new room
-            socket.join(player.roomId);
-
+            // For existing rooms
+            socket.join(targetRoomId);
+            
             // Add player to room's player list if not already present
             if (!room.players.find(p => p.id === player.id)) {
                 room.players.push(player);
             }
-
+            
             // Broadcast to all clients in the room
-            io.to(player.roomId).emit('game:playerJoined', player);
+            io.to(targetRoomId).emit('game:playerJoined', player);
 
             // Send current game state to the new player
-            socket.emit('game:state', {
-                roomId: room.roomId,
-                players: room.players,
-                status: room.status,
-                currentRound: room.currentRound,
-                maxRounds: room.maxRounds,
-                currentWord: room.currentWord,
-                category: room.category,
-                maxAttempts: room.maxAttempts || 3,
-                currentAttempts: room.currentAttempts || 0
-            });
+            socket.emit('game:state', room);
 
-            console.log(`Player ${player.nickname} joined room ${player.roomId}`);
+            console.log(`Player ${player.nickname} joined room ${targetRoomId}`);
         } catch (error) {
             console.error('Error joining game:', error);
             socket.emit('game:error', 'Failed to join game');

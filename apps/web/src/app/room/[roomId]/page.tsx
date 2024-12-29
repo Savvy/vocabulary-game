@@ -1,6 +1,5 @@
 'use client'
 
-/* import { useParams } from 'next/navigation' */
 import { useGame } from '@/contexts/GameContext'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,12 +7,23 @@ import { ScoreBoard } from '@/components/ScoreBoard'
 import { Player } from '@vocab/shared'
 import { GameArea } from '@/components/GameArea'
 import { useSocket } from '@/hooks/useSocket'
+import { useEffect } from 'react'
 
 export default function GameRoom() {
-    /* const { roomId } = useParams() */
-    const { socket } = useSocket()
+    const { socket, isConnected } = useSocket()
     const { state, startGame } = useGame()
-    const isHost = state.players.find((p: Player) => p.id === socket?.id)?.isHost || false;
+
+    useEffect(() => {
+        console.log('GameRoom state:', {
+            socketId: socket?.id,
+            isConnected,
+            players: state.players,
+            socketConnected: socket?.connected
+        })
+    }, [socket?.id, isConnected, state.players])
+
+    const isHost = isConnected && socket ? 
+        state.players.find((p: Player) => p.id === socket.id)?.isHost || false : false
 
     const handleStartGame = () => {
         if (!isHost) {
