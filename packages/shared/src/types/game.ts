@@ -6,21 +6,6 @@ export type Player = {
     isHost: boolean;
 };
 
-export type GameState = {
-    roomId: string;
-    players: Player[];
-    currentWord?: Word;
-    category?: string;
-    status: 'waiting' | 'playing' | 'finished';
-    roundStartTime?: number;
-    currentRound: number;
-    maxRounds: number;
-    currentTurn?: string;
-    timeRemaining?: number;
-    maxAttempts: number;
-    currentAttempts: number;
-};
-
 export type Word = {
     id: string;
     word: string;
@@ -31,9 +16,23 @@ export type Word = {
     options: string[];
 };
 
-// Socket event types
+// Base game state used by both frontend and backend
+export interface BaseGameState {
+    roomId: string;
+    players: Player[];
+    status: 'waiting' | 'playing' | 'finished';
+    currentRound: number;
+    maxRounds: number;
+    currentWord?: Word;
+    category?: string;
+    currentTurn?: string;
+    timeRemaining?: number;
+    scores: Record<string, number>;
+}
+
+// Socket Events (keep as is)
 export type ServerToClientEvents = {
-    'game:state': (state: GameState) => void;
+    'game:state': (state: BaseGameState) => void;
     'game:playerJoined': (player: Player) => void;
     'game:playerLeft': (playerId: string) => void;
     'game:roundStart': (word: Word) => void;
@@ -49,4 +48,16 @@ export type ClientToServerEvents = {
     'game:spinWheel': () => void;
     'game:answer': (answer: string) => void;
     'game:startGame': () => void;
+    'game:startTurn': () => void;
 };
+
+export interface TimeAttackState extends BaseGameState {
+    currentWord?: Word;
+    category?: string;
+    currentTurn?: string;
+    timeRemaining: number;
+    wordsAnswered: Record<string, { 
+        correct: number;
+        total: number;
+    }>;
+}

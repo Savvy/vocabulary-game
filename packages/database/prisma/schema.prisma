@@ -11,7 +11,7 @@ model Word {
     id          String   @id @default(cuid())
     word        String
     translation String
-    imageUrl    String?
+    imageUrl    String
     category    Category @relation(fields: [categoryId], references: [id])
     categoryId  String
     language    Language @relation(fields: [languageId], references: [id])

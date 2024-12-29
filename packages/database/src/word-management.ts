@@ -1,16 +1,22 @@
 import { prisma } from './index';
-import type { Word, Category, Language } from '@prisma/client';
 
 export async function createWord(data: {
     word: string;
     translation: string;
-    imageUrl?: string;
+    imageUrl: string;
     categoryId: string;
     languageId: string;
     options: string[];
 }) {
     return prisma.word.create({
-        data,
+        data: {
+            word: data.word,
+            translation: data.translation,
+            imageUrl: data.imageUrl,
+            options: data.options,
+            category: { connect: { id: data.categoryId } },
+            language: { connect: { id: data.languageId } }
+        },
         include: {
             category: true,
             language: true,
@@ -31,10 +37,13 @@ export async function getRandomWordsByCategory(
         throw new Error(`Language with code ${languageCode} not found`);
     }
 
+    console.log('Category ID:', categoryId);
+    console.log('Language ID:', language.id);
+
     const words = await prisma.word.findMany({
         where: {
             categoryId,
-            languageId: language.id
+            languageId: language.id,
         },
         take: count,
         orderBy: {

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Wheel } from 'react-custom-roulette'
 import { Button } from '@/components/ui/button'
-import { useGame } from '@/contexts/GameContext'
 import confetti from 'canvas-confetti'
 
 interface RouletteWheelProps {
@@ -13,7 +12,6 @@ interface RouletteWheelProps {
 export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
     const [mustSpin, setMustSpin] = useState(false)
     const [prizeNumber, setPrizeNumber] = useState(0)
-    const { spinWheel } = useGame()
 
     const data = [
         { option: 'Animals', style: { backgroundColor: '#FF6B6B', textColor: 'white' } },
@@ -29,7 +27,6 @@ export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
             const newPrizeNumber = Math.floor(Math.random() * data.length)
             setPrizeNumber(newPrizeNumber)
             setMustSpin(true)
-            spinWheel()
         }
     }
 

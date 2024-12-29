@@ -1,12 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
-import { GameState, Player, Word } from '@vocab/shared';
+import { BaseGameState, Player, Word, TimeAttackState } from '@vocab/shared';
 import { useSocket } from '@/hooks/useSocket';
 import { useToast } from '@/hooks/use-toast';
 
 type GameContextType = {
-    state: GameState;
+    state: TimeAttackState;
     joinGame: (nickname: string, roomId?: string) => void;
     leaveGame: () => void;
     spinWheel: () => void;
@@ -14,18 +14,19 @@ type GameContextType = {
     startGame: () => void;
 };
 
-const initialState: GameState = {
+const initialState: TimeAttackState = {
     roomId: '',
     players: [],
     status: 'waiting',
     currentRound: 0,
     maxRounds: 10,
-    maxAttempts: 3,
-    currentAttempts: 0
+    timeRemaining: 30,
+    scores: {},
+    wordsAnswered: {}
 };
 
 type GameAction =
-    | { type: 'SET_STATE'; payload: GameState }
+    | { type: 'SET_STATE'; payload: TimeAttackState }
     | { type: 'ADD_PLAYER'; payload: Player }
     | { type: 'REMOVE_PLAYER'; payload: string }
     | { type: 'SET_WORD'; payload: Word }
@@ -33,25 +34,15 @@ type GameAction =
     | { type: 'UPDATE_SCORES'; payload: Record<string, number> }
     | { type: 'SET_ROOM_ID'; payload: string };
 
-function gameReducer(state: GameState, action: GameAction): GameState {
+function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackState {
     switch (action.type) {
         case 'SET_STATE':
-            console.log('[GameReducer] Processing SET_STATE:', {
-                oldStatus: state.status,
-                newStatus: action.payload.status
-            });
             return {
-                roomId: action.payload.roomId || state.roomId,
+                ...state,
+                ...action.payload,
                 players: action.payload.players || [],
-                status: action.payload.status || state.status,
-                currentRound: action.payload.currentRound ?? state.currentRound,
-                maxRounds: action.payload.maxRounds ?? state.maxRounds,
-                currentWord: action.payload.currentWord,
-                category: action.payload.category,
-                maxAttempts: action.payload.maxAttempts ?? state.maxAttempts,
-                currentAttempts: action.payload.currentAttempts ?? state.currentAttempts,
-                timeRemaining: action.payload.timeRemaining,
-                currentTurn: action.payload.currentTurn
+                scores: action.payload.scores || {},
+                wordsAnswered: action.payload.wordsAnswered || {}
             };
         case 'ADD_PLAYER':
             return {
@@ -61,7 +52,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         case 'REMOVE_PLAYER':
             return {
                 ...state,
-                players: state.players.filter((p) => p.id !== action.payload),
+                players: state.players.filter((p: Player) => p.id !== action.payload),
             };
         case 'SET_WORD':
             return {
@@ -76,10 +67,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         case 'UPDATE_SCORES':
             return {
                 ...state,
-                players: state.players.map(player => ({
-                    ...player,
-                    score: action.payload[player.id] || player.score,
-                })),
+                scores: action.payload,
             };
         case 'SET_ROOM_ID':
             return {
@@ -112,14 +100,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             console.log('[Socket] Disconnected');
         });
 
-        const handleGameState = (newState: GameState) => {
+        const handleGameState = (newState: BaseGameState) => {
             console.log('[Client] Received game:state:', { 
                 socketId: socket.id,
                 roomId: newState.roomId,
                 status: newState.status,
                 players: newState.players?.length
             });
-            dispatch({ type: 'SET_STATE', payload: newState });
+            dispatch({ type: 'SET_STATE', payload: newState as TimeAttackState });
         };
         socket.on('game:state', handleGameState);
         
@@ -192,6 +180,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             socket.off('game:error');
         };
     }, [socket, toast]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        // Add game state handler
+        socket.on('game:state', (newState) => {
+            dispatch({ type: 'SET_STATE', payload: newState as TimeAttackState });
+        });
+
+        return () => {
+            socket.off('game:state');
+        };
+    }, [socket]);
 
     // Actions
     const joinGame = useCallback((nickname: string, roomId?: string) => {
