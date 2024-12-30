@@ -37,6 +37,11 @@ type GameAction =
 function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackState {
     switch (action.type) {
         case 'SET_STATE':
+            // Prevent unnecessary state updates if the game is finished
+            if (state.status === 'finished' && action.payload.status === 'finished') {
+                return state;
+            }
+            
             return {
                 ...state,
                 status: action.payload.status,
@@ -47,14 +52,8 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
                 category: action.payload.category,
                 currentTurn: action.payload.currentTurn,
                 players: action.payload.players || state.players,
-                scores: {
-                    ...state.scores,
-                    ...action.payload.scores
-                },
-                wordsAnswered: {
-                    ...state.wordsAnswered,
-                    ...action.payload.wordsAnswered
-                }
+                scores: action.payload.scores || state.scores,
+                wordsAnswered: action.payload.wordsAnswered || state.wordsAnswered
             };
         case 'ADD_PLAYER':
             if (state.players.some(p => p.id === action.payload.id)) {

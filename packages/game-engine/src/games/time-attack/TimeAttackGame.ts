@@ -13,7 +13,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 maxPlayers: 8,
                 minPlayers: 1,
                 roundTimeLimit: 30,
-                maxRounds: 10,
+                maxRounds: 2, // Temporary for testing
                 scoreSystem: {
                     basePoints: 1,
                     timeBonus: false,
@@ -214,6 +214,21 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
     end(): void {
         console.log('[Game] Ending game');
         this.stopTimer();
+        
+        // Reset game state
+        this.state = {
+            ...this.state,
+            status: 'finished',
+            currentWord: undefined,
+            category: undefined,
+            categoryId: undefined,
+            currentTurn: undefined,
+            timeRemaining: 0
+        };
+        
+        // Notify state change one last time
+        this.onStateChange?.(this.state);
+        
         super.end();
     }
 

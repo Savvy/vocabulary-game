@@ -10,6 +10,7 @@ import { CurrentPlayer } from './components/CurrentPlayer';
 import { GameStage } from './components/GameStage';
 import { WordDisplay } from './components/WordDisplay';
 import { ScoreBoard } from './components/ScoreBoard';
+import { GameEndView } from './components/GameEndView';
 
 export function TimeAttackGame() {
     const { socket } = useSocket();
@@ -37,6 +38,16 @@ export function TimeAttackGame() {
             setLastTurn(currentTurnId || null);
         }
     }, [state.currentTurn, state.status, state.wordsAnswered, lastTurn]);
+
+    if (state.status === 'finished') {
+        return (
+            <GameEndView 
+                players={state.players}
+                wordsAnswered={state.wordsAnswered}
+                scores={state.scores}
+            />
+        );
+    }
 
     return (
         <div className="flex flex-col items-center gap-8 w-full max-w-5xl mx-auto">
