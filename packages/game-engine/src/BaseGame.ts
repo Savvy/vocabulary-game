@@ -42,11 +42,13 @@ export abstract class BaseGame<TState extends BaseGameState, TAction> implements
         }
         this.state.players.push(player);
         this.state.scores[player.id] = 0;
+        console.log('[Game] Player added', player, this.state.players);
     }
 
     removePlayer(playerId: string): void {
         this.state.players = this.state.players.filter(p => p.id !== playerId);
         delete this.state.scores[playerId];
+        console.log('[Game] Player removed', playerId, this.state.players);
     }
 
     abstract startRound(): void;

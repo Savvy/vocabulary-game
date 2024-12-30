@@ -24,6 +24,7 @@ export function setupGameHandlers(
                 io.to(targetRoomId).emit('game:state', state);
             };
             games.set(targetRoomId, game);
+            console.log('[Socket] Game created', game);
             socket.emit('game:roomCreated', targetRoomId);
         }
 
@@ -32,7 +33,7 @@ export function setupGameHandlers(
             nickname,
             score: 0,
             roomId: targetRoomId,
-            isHost: !game.getState().players.length
+            isHost: game.getState().players.length === 0
         };
 
         game.addPlayer(player);
@@ -92,10 +93,14 @@ export function setupGameHandlers(
         }));
         
         game.setWordQueue(words);
+        console.log('[Socket] Set word queue', words);
         game.dispatch({
             type: 'START_TURN',
             payload: { playerId: socket.id }
         });
+        
+        // Broadcast updated state to all players in the room
+        io.to(game.getState().roomId).emit('game:state', game.getState());
     });
 
     socket.on('game:answer', (answer: string) => {

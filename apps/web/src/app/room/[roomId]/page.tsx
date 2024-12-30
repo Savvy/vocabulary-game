@@ -12,13 +12,8 @@ export default function GameRoom() {
     const { state, startGame } = useGame()
 
     useEffect(() => {
-        console.log('GameRoom state:', {
-            socketId: socket?.id,
-            isConnected,
-            players: state.players,
-            socketConnected: socket?.connected
-        })
-    }, [socket?.id, isConnected, state.players])
+        console.log('GameRoom state:', state)
+    }, [socket.id, isConnected, state.players, state.status, state.currentTurn, state])
 
     const isHost = isConnected && socket ?
         state.players.find((p: Player) => p.id === socket.id)?.isHost || false : false

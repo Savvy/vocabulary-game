@@ -35,7 +35,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         }
         
         this.state.status = 'playing';
-        this.state.currentRound = 1;
+        this.state.currentRound = 0;
         this.state.timeRemaining = this.config.roundTimeLimit;
         
         // Set initial turn to first player
@@ -58,12 +58,20 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         const nextPlayerIndex = (currentPlayerIndex + 1) % this.state.players.length;
         this.state.currentTurn = this.state.players[nextPlayerIndex].id;
         this.state.timeRemaining = this.config.roundTimeLimit;
+
+        // Reset words
         this.state.currentWord = undefined;
         this.state.category = undefined;
+        this.state.categoryId = undefined;
+        this.state.wordsAnswered = {}
+        this.wordQueue = []
         
         if (nextPlayerIndex === 0) {
             this.state.currentRound++;
+            console.log(`[Game] Starting round ${this.state.currentRound}`);
         }
+
+        console.log('[Game] State for round', this.state);
 
         // Notify state change
         this.onStateChange?.(this.state);
@@ -71,8 +79,10 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
 
     endRound(): void {
         if (this.state.currentRound >= this.config.maxRounds) {
+            console.log('[Game] Ending game, max rounds reached');
             this.end();
         } else {
+            console.log('[Game] Starting next round');
             this.startRound();
         }
     }
@@ -161,11 +171,17 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
 
     private startPlayerTurn(playerId: string): void {
         if (playerId !== this.state.currentTurn) return;
-        if (this.wordQueue.length === 0) return;
+        console.log('[Game] Starting player turn', playerId);
+        if (this.wordQueue.length === 0) {
+            console.log('[Game] No words left, ending turn');
+            this.endPlayerTurn(playerId);
+            return;
+        }
         
         this.state.timeRemaining = this.config.roundTimeLimit;
         this.state.currentWord = this.wordQueue[0]; // Get first word
         this.wordQueue = this.wordQueue.slice(1); // Remove first word
+        console.log('[Game] Starting timer');
         this.startTimer();
         this.onStateChange?.(this.state);
     }
@@ -173,11 +189,23 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
     private endPlayerTurn(playerId: string): void {
         if (playerId !== this.state.currentTurn) return;
         
+        console.log('[Game] Ending player turn', playerId);
         this.stopTimer();
         this.state.currentWord = undefined;
         this.state.category = undefined;
-        this.endRound();
-        this.onStateChange?.(this.state);
+        
+        // Check if all players have had their turn
+        const currentPlayerIndex = this.state.players.findIndex(p => p.id === playerId);
+        const isLastPlayer = currentPlayerIndex === this.state.players.length - 1;
+        
+        if (isLastPlayer) {
+            console.log('[Game] Last player, ending round');
+            this.endRound();
+        } else {
+            console.log('[Game] Not last player, starting next turn');
+            this.state.currentTurn = this.state.players[currentPlayerIndex + 1].id;
+            this.onStateChange?.(this.state);
+        }
     }
 
     // Add onStateChange callback for socket updates
@@ -185,6 +213,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
 
     // Override end method to cleanup
     end(): void {
+        console.log('[Game] Ending game');
         this.stopTimer();
         super.end();
     }
