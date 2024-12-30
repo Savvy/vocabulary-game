@@ -8,12 +8,12 @@ import {
 import { TimeAttackGame } from '@vocab/game-engine';
 import { getRandomWordsByCategory, getAllCategories } from '@vocab/database';
 
+const games = new Map<string, TimeAttackGame>();
+
 export function setupGameHandlers(
     io: Server<ClientToServerEvents, ServerToClientEvents>,
     socket: Socket<ClientToServerEvents, ServerToClientEvents>
 ) {
-    const games = new Map<string, TimeAttackGame>();
-
     socket.on('game:join', ({ nickname, roomId }) => {
         const targetRoomId = roomId || uuidv4();
         let game = games.get(targetRoomId);
@@ -36,9 +36,17 @@ export function setupGameHandlers(
             isHost: game.getState().players.length === 0
         };
 
+        console.log('[Socket] Game state FROM JOIN BEFORE ADD', player.nickname, game.getState());
+
         game.addPlayer(player);
         socket.join(targetRoomId);
+        
+        // Emit player joined event
         io.to(targetRoomId).emit('game:playerJoined', player);
+        
+        console.log('[Socket] Game state FROM NEW JOIN', player.nickname, game.getState());
+        // Emit current state to the new player
+        socket.emit('game:state', game.getState());
     });
 
     socket.on('game:spinWheel', async () => {

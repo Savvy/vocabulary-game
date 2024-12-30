@@ -25,14 +25,21 @@ export default function GameRoom() {
                 GameRoom - Host: {host?.nickname}, Status: {state.status}
             </h1>
             {state.status === 'waiting' ? (
-                <div className="text-center">
+                <div className="text-center space-y-4">
                     {isHost ? (
-                        <Button onClick={startGame}>
-                            Start Game
-                        </Button>
+                        <div className="my-12">
+                            <Button onClick={startGame}>
+                                Start Game
+                            </Button>
+                        </div>
                     ) : (
                         <p>Waiting for host to start the game...</p>
                     )}
+                    <div className="space-x-2">
+                        {state.players.map((p: Player) => (
+                            <span key={p.id}>{p.nickname}</span>
+                        ))}
+                    </div>
                 </div>
             ) : (
                 <TimeAttackGame />

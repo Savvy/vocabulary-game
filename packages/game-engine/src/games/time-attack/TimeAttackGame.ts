@@ -63,7 +63,6 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.state.currentWord = undefined;
         this.state.category = undefined;
         this.state.categoryId = undefined;
-        this.state.wordsAnswered = {}
         this.wordQueue = []
         
         if (nextPlayerIndex === 0) {

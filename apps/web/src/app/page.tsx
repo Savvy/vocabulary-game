@@ -53,6 +53,7 @@ export default function Home() {
         }
 
         const handleRoomCreated = (newRoomId: string) => {
+          console.log('[Game from Socket] Room created', newRoomId);
           cleanup()
           resolve({ success: true, roomId: newRoomId })
         }
