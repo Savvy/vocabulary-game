@@ -61,12 +61,23 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
 
     endRound(): void {
         if (this.state.currentRound >= this.config.maxRounds) {
-            console.log('[Game] Ending game, max rounds reached');
-            this.end();
-        } else {
-            console.log('[Game] Starting next round');
-            this.startRound();
+            console.log('[Game] Current round:', this.state.currentRound);
+            console.log('[Game] Max rounds:', this.config.maxRounds);
+            
+            // Check if the current round is complete (all players have had their turn)
+            const currentPlayerIndex = this.state.players.findIndex(p => p.id === this.state.currentTurn);
+            const isLastPlayer = currentPlayerIndex === this.state.players.length - 1;
+            
+            if (isLastPlayer) {
+                console.log('[Game] Ending game, max rounds reached and last player finished');
+                this.end();
+                return;
+            }
         }
+        
+        console.log('[Game] Starting next round');
+        this.state.currentRound++;
+        this.startRound();
     }
 
     dispatch(action: TimeAttackAction): void {
@@ -186,7 +197,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         
         if (isLastPlayer) {
             console.log('[Game] Last player, ending round');
-            this.state.currentRound++;
+            /* this.state.currentRound++; */
             this.endRound();
         } else {
             console.log('[Game] Not last player, starting next turn');
