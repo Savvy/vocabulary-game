@@ -115,14 +115,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         });
 
         const handleGameState = (newState: BaseGameState) => {
-            console.log('[Client] Received game:state:', { 
-                socketId: socket.id,
-                roomId: newState.roomId,
-                status: newState.status,
-                players: newState.players?.length
-            });
-            dispatch({ type: 'SET_STATE', payload: newState as TimeAttackState });
+                dispatch({ type: 'SET_STATE', payload: newState as TimeAttackState });
         };
+
         socket.on('game:state', handleGameState);
         
         return () => {
