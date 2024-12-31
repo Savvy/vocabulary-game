@@ -2,25 +2,20 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useGame } from '@/contexts/GameContext'
 import { useToast } from '@/hooks/use-toast'
 import { useSocket } from '@/hooks/useSocket'
+import Header from './components/Header'
+import GameForm from './components/GameForm'
 
 export default function Home() {
-  const [nickname, setNickname] = useState('')
-  const [roomId, setRoomId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { joinGame } = useGame()
   const { toast } = useToast()
   const router = useRouter()
   const { socket } = useSocket()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async ({ nickname, roomId }: { nickname: string, roomId?: string }) => {
     if (!nickname.trim()) {
       toast({
         variant: "destructive",
@@ -73,7 +68,7 @@ export default function Home() {
       })
 
       loadingToast.dismiss()
-      
+
       if (result.success && result.roomId) {
         router.push(`/room/${result.roomId}`)
       }
@@ -90,45 +85,12 @@ export default function Home() {
   }
 
   return (
-    <main className="container mx-auto min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome to Vocabulary Game</CardTitle>
-          <CardDescription>
-            Enter your nickname to start playing
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nickname">Nickname</Label>
-              <Input
-                id="nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="Enter your nickname"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="roomId">Room ID (optional)</Label>
-              <Input
-                id="roomId"
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value)}
-                placeholder="Enter room ID to join existing game"
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="space-y-2">
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {roomId ? 'Join Game' : 'Create Game'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <main className="mx-auto min-h-screen max-w-md w-full p-6">
+      <Header />
+      <GameForm
+        handleSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
     </main>
   )
 }

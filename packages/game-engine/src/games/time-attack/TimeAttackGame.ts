@@ -176,8 +176,9 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         }
         
         this.state.timeRemaining = this.config.roundTimeLimit;
-        this.state.currentWord = this.wordQueue[0]; // Get first word
-        this.wordQueue = this.wordQueue.slice(1); // Remove first word
+        this.state.currentWord = this.wordQueue[0];
+        this.state.hasStartedTurn = true;
+        this.wordQueue = this.wordQueue.slice(1);
         console.log('[Game] Starting timer');
         this.startTimer();
         this.onStateChange?.(this.state);
@@ -190,6 +191,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.stopTimer();
         this.state.currentWord = undefined;
         this.state.category = undefined;
+        this.state.hasStartedTurn = false;
         
         // Check if all players have had their turn
         const currentPlayerIndex = this.state.players.findIndex(p => p.id === playerId);

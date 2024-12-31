@@ -16,7 +16,7 @@ export default function GameRoom() {
     const host = state.players.find((p: Player) => p.isHost)
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl text-center font-bold">
+            <h1 className="text-2xl text-center font-bold mb-8">
                 GameRoom - Host: {host?.nickname}, Status: {state.status}
             </h1>
             {state.status === 'waiting' ? (

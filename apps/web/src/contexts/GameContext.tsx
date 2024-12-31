@@ -23,7 +23,8 @@ const initialState: TimeAttackState = {
     scores: {},
     wordsAnswered: {},
     timeRemaining: 30,
-    roundTimeLimit: 30
+    roundTimeLimit: 30,
+    hasStartedTurn: false
 };
 
 type GameAction =
@@ -53,6 +54,7 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
                 currentWord: action.payload.currentWord,
                 category: action.payload.category,
                 currentTurn: action.payload.currentTurn,
+                hasStartedTurn: action.payload.hasStartedTurn,
                 players: action.payload.players || state.players,
                 scores: action.payload.scores || state.scores,
                 wordsAnswered: action.payload.wordsAnswered || state.wordsAnswered
