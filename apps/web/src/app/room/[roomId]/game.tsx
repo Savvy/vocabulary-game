@@ -66,7 +66,9 @@ export function TimeAttackGame() {
             />
             
             <GameTimer 
-                timeRemaining={state.timeRemaining} 
+                timerStartedAt={state.timerStartedAt || 0}
+                roundDuration={state.roundTimeLimit}
+                isRunning={!!state.currentWord}
             />
             
             <CurrentPlayer 

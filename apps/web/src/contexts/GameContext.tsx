@@ -20,9 +20,10 @@ const initialState: TimeAttackState = {
     status: 'waiting',
     currentRound: 0,
     maxRounds: 10,
-    timeRemaining: 30,
     scores: {},
-    wordsAnswered: {}
+    wordsAnswered: {},
+    timeRemaining: 30,
+    roundTimeLimit: 30
 };
 
 type GameAction =
@@ -48,6 +49,7 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
                 currentRound: action.payload.currentRound,
                 maxRounds: action.payload.maxRounds,
                 timeRemaining: action.payload.timeRemaining,
+                timerStartedAt: action.payload.timerStartedAt,
                 currentWord: action.payload.currentWord,
                 category: action.payload.category,
                 currentTurn: action.payload.currentTurn,

@@ -5,7 +5,6 @@ import { Word } from '@vocab/shared';
 export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> {
     private wordQueue: Word[] = [];
     private timer: ReturnType<typeof setInterval> | null = null;
-    private startTime: number = 0;
 
     constructor() {
         super(
@@ -24,7 +23,8 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 timeRemaining: 30,
                 currentRound: 0,
                 status: 'waiting',
-                wordsAnswered: {}
+                wordsAnswered: {},
+                roundTimeLimit: 30
             }
         );
     }
@@ -129,19 +129,23 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
             clearInterval(this.timer);
         }
 
-        this.startTime = Date.now();
+        const startTime = Date.now();
+        this.state.timerStartedAt = startTime;
+        this.state.timeRemaining = this.config.roundTimeLimit;
+        this.onStateChange?.(this.state);
         
+        // Server only checks for turn end
         this.timer = setInterval(() => {
-            const elapsed = (Date.now() - this.startTime) / 1000;
-            this.state.timeRemaining = Math.max(0, this.config.roundTimeLimit - elapsed);
+            const elapsed = (Date.now() - startTime) / 1000;
             
-            if (this.state.timeRemaining <= 0) {
+            if (elapsed >= this.config.roundTimeLimit) {
                 this.endPlayerTurn(this.state.currentTurn!);
                 return;
             }
-
-            this.onStateChange?.(this.state);
-        }, 16); // ~60fps update rate
+            
+            // Update time remaining every second for state consistency
+            this.state.timeRemaining = Math.max(0, this.config.roundTimeLimit - elapsed);
+        }, 1000);
     }
 
     private stopTimer(): void {

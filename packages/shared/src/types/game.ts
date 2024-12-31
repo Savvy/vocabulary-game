@@ -56,6 +56,8 @@ export interface TimeAttackState extends BaseGameState {
     category?: string;
     currentTurn?: string;
     timeRemaining: number;
+    timerStartedAt?: number;
+    roundTimeLimit: number;
     wordsAnswered: Record<string, { 
         correct: number;
         total: number;
