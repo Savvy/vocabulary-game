@@ -17,7 +17,7 @@ export function setupGameHandlers(
         let game = games.get(targetRoomId);
 
         if (!game) {
-            game = new TimeAttackGame();
+            game = new TimeAttackGame(targetRoomId);
             game.onStateChange = (state) => {
                 io.to(targetRoomId).emit('game:state', state);
             };
@@ -146,9 +146,11 @@ export function setupGameHandlers(
     });
 
     socket.on('disconnect', () => {
+        console.log('[Socket] Disconnecting from socket', socket.id);
         const game = findGameBySocketId(socket.id, games);
         if (!game) return;
 
+        console.log('[Socket] Game state FROM DISCONNECT BEFORE REMOVE', game.getState().roomId);
         game.removePlayer(socket.id);
         const state = game.getState();
         io.to(state.roomId).emit('game:playerLeft', socket.id);

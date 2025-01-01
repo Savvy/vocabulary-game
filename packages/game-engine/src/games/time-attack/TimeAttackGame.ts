@@ -6,7 +6,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
     private wordQueue: Word[] = [];
     private timer: ReturnType<typeof setInterval> | null = null;
 
-    constructor() {
+    constructor(roomId: string) {
         super(
             {
                 maxPlayers: 8,
@@ -20,6 +20,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 }
             },
             {
+                roomId,
                 timeRemaining: 30,
                 currentRound: 0,
                 status: 'waiting',
