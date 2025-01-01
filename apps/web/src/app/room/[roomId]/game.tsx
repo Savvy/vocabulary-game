@@ -94,6 +94,7 @@ export function TimeAttackGame() {
                             word={state.currentWord}
                             isCurrentTurn={isCurrentTurn}
                             lastAnswer={lastAnswer}
+                            inputType={'multiple-choice'}
                             onAnswer={(answer) => {
                                 setLastAnswer({ text: answer, isCorrect: null });
                                 socket?.emit('game:answer', answer);
