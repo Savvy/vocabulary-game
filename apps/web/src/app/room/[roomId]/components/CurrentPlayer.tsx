@@ -1,6 +1,7 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { Player } from '@vocab/shared';
 import { User } from 'lucide-react';
 
@@ -16,11 +17,12 @@ export function CurrentPlayer({ isCurrentTurn, players, currentTurn }: CurrentPl
     return (
         <Card className="w-full p-4">
             <div className="flex items-center gap-3">
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5 text-primary" />
                 <div>
-                    <h3 className={`font-semibold ${
-                        isCurrentTurn ? 'text-primary' : 'text-muted-foreground'
-                    }`}>
+                    <h3 className={cn(
+                        "text-muted-foreground",
+                        isCurrentTurn ? 'font-bold' : 'font-normal'
+                    )}>
                         {isCurrentTurn ? (
                             "Your Turn!"
                         ) : (

@@ -9,6 +9,7 @@ import { PlayerAvatar } from './components/waiting/PlayerAvatar'
 import { Play, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import WaitingRoomHeader from './components/waiting/Header'
+import { AnimatePresence } from 'framer-motion'
 
 export default function GameRoom() {
     const { socket, isConnected } = useSocket()
@@ -44,19 +45,21 @@ function WaitingRoom({ state, isHost, startGame }: {
                 GameRoom - Host: {host?.nickname}, Status: {state.status}
             </h1> */}
             <WaitingRoomHeader
-                title="Vocab Time Attack"
+                title="Time Attack"
                 // TODO: get max players from backend
                 playerRange={`${state.players.length} / 4`}
             />
             <div className="text-center">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    {state.players.map((player: Player) => (
-                        <PlayerAvatar
-                            key={player.id}
-                            nickname={player.nickname}
-                            isHost={player.isHost}
-                        />
-                    ))}
+                    <AnimatePresence>
+                        {state.players.map((player: Player) => (
+                            <PlayerAvatar
+                                key={player.id}
+                                nickname={player.nickname}
+                                isHost={player.isHost}
+                            />
+                        ))}
+                    </AnimatePresence>
                 </div>
                 <div className="text-center mt-12 mb-4">
                     <p className="text-indigo-300">Waiting for host to start...</p>

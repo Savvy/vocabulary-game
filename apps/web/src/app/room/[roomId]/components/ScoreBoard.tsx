@@ -44,7 +44,7 @@ export function ScoreBoard({ players, wordsAnswered, currentTurn }: ScoreBoardPr
                         <div
                             key={player.id}
                             className={cn(
-                                'flex items-center justify-between p-6 rounded-xl',
+                                'flex items-center justify-between p-3 rounded-xl',
                                 'bg-gradient-to-r from-primary/10 to-transparent',
                                 { 'from-primary/20': player.id === currentTurn }
                             )}

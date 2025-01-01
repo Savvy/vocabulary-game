@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Wheel } from 'react-custom-roulette'
 import { Button } from '@/components/ui/button'
 import confetti from 'canvas-confetti'
+import { RotateCw } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface RouletteWheelProps {
     onSpinComplete: (category: string) => void
@@ -59,6 +61,7 @@ export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
                 disabled={mustSpin}
                 size="lg"
             >
+                <RotateCw className={cn("w-4 h-4 mr-2", mustSpin && "animate-spin")} />
                 {mustSpin ? 'Spinning...' : 'Spin'}
             </Button>
         </div>
