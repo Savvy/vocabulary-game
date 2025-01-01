@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Wheel } from 'react-custom-roulette'
 import { Button } from '@/components/ui/button'
-import confetti from 'canvas-confetti'
 import { RotateCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -34,11 +33,6 @@ export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
 
     const handleSpinComplete = () => {
         setMustSpin(false)
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-        })
         onSpinComplete(data[prizeNumber].option)
     }
 
