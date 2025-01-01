@@ -1,10 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { Wheel } from 'react-custom-roulette'
+import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { RotateCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const Wheel = dynamic(
+  () => import('react-custom-roulette').then(mod => mod.Wheel),
+  { ssr: false }
+)
 
 interface RouletteWheelProps {
     onSpinComplete: (category: string) => void
