@@ -1,5 +1,6 @@
 "use client"
 
+import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Copy, Gamepad2, Users } from "lucide-react"
@@ -7,9 +8,10 @@ import { Copy, Gamepad2, Users } from "lucide-react"
 interface GameHeaderProps {
     title: string;
     playerRange: string;
+    roomId: string;
 }
 
-export default function WaitingRoomHeader({ title, playerRange }: GameHeaderProps) {
+export default function WaitingRoomHeader({ title, playerRange, roomId }: GameHeaderProps) {
     return (
         <div className="flex items-center justify-between mb-12 bg-[#1a2333]/50 p-4 rounded-2xl border border-indigo-500/10">
             <div className="flex items-center gap-4">
@@ -28,16 +30,16 @@ export default function WaitingRoomHeader({ title, playerRange }: GameHeaderProp
                 </div>
             </div>
 
-            <Button
+            <CopyButton
+                text={roomId}
                 className={cn(
                     "px-4 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center",
                     "hover:bg-indigo-500/20 hover:border-indigo-500/30"
                 )}
                 size={'sm'}
             >
-                <Copy className="w-4 h-4 mr-2 text-indigo-400" />
                 <span className="text-sm font-medium text-indigo-300">Copy Room ID</span>
-            </Button>
+            </CopyButton>
         </div>
     )
 }

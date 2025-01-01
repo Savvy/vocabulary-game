@@ -48,6 +48,7 @@ function WaitingRoom({ state, isHost, startGame }: {
                 title="Time Attack"
                 // TODO: get max players from backend
                 playerRange={`${state.players.length} / 4`}
+                roomId={state.roomId}
             />
             <div className="text-center">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
