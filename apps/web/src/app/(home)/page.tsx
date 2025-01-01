@@ -85,12 +85,14 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-md w-full p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <Header />
-      <GameForm
-        handleSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
-    </main>
+      <div className="w-full max-w-md">
+        <GameForm
+          isSubmitting={isSubmitting}
+          handleSubmit={handleSubmit}
+        />
+      </div>
+    </div>
   )
 }

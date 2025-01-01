@@ -17,12 +17,15 @@ export function setupGameHandlers(
         let game = games.get(targetRoomId);
 
         if (!game) {
+            if (roomId) {
+                socket.emit('game:error', 'Game not found');
+                return;
+            }
             game = new TimeAttackGame(targetRoomId);
             game.onStateChange = (state) => {
                 io.to(targetRoomId).emit('game:state', state);
             };
             games.set(targetRoomId, game);
-            console.log('[Socket] Game created', game);
             socket.emit('game:roomCreated', targetRoomId);
         }
 
@@ -34,16 +37,9 @@ export function setupGameHandlers(
             isHost: game.getState().players.length === 0
         };
 
-        console.log('[Socket] Game state FROM JOIN BEFORE ADD', player.nickname, game.getState());
-
         game.addPlayer(player);
         socket.join(targetRoomId);
-        
-        // Emit player joined event
         io.to(targetRoomId).emit('game:playerJoined', player);
-        
-        console.log('[Socket] Game state FROM NEW JOIN', player.nickname, game.getState());
-        // Emit current state to the new player
         socket.emit('game:state', game.getState());
     });
 

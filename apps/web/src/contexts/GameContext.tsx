@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useReducer, useCallback } 
 import { BaseGameState, Player, Word, TimeAttackState } from '@vocab/shared';
 import { useSocket } from '@/hooks/useSocket';
 import { useToast } from '@/hooks/use-toast';
+import { useGameSession } from '@/hooks/useGameSession';
 
 type GameContextType = {
     state: TimeAttackState;
@@ -103,6 +104,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(gameReducer, initialState);
     const { toast } = useToast();
     const { socket } = useSocket();
+    const { saveSession, clearSession } = useGameSession();
 
     useEffect(() => {
         if (!socket) {
@@ -200,6 +202,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         
         const handleConnect = () => {
             socket.emit('game:join', { nickname, roomId });
+            saveSession(nickname, roomId || '');
         };
 
         if (socket.connected) {
@@ -208,7 +211,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             socket.connect();
             socket.once('connect', handleConnect);
         }
-    }, [socket]);
+    }, [socket, saveSession]);
 
     const leaveGame = useCallback(() => {
         if (!socket) return;
@@ -234,6 +237,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (!socket) return;
         socket.emit('game:answer', answer);
     }, [socket]);
+
+    useEffect(() => {
+        if (state.status === 'finished') {
+            clearSession();
+        }
+    }, [state.status, clearSession]);
 
     return (
         <GameContext.Provider
