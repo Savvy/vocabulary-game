@@ -2,17 +2,15 @@ import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import {
     ClientToServerEvents,
-    ServerToClientEvents,
-    Player
-} from '@vocab/shared';
+    ServerToClientEvents} from '@vocab/shared';
 import { TimeAttackGame } from '@vocab/game-engine';
 import { getRandomWordsByCategory, getAllCategories } from '@vocab/database';
 
-const games = new Map<string, TimeAttackGame>();
 
 export function setupGameHandlers(
     io: Server<ClientToServerEvents, ServerToClientEvents>,
-    socket: Socket<ClientToServerEvents, ServerToClientEvents>
+    socket: Socket<ClientToServerEvents, ServerToClientEvents>,
+    games: Map<string, TimeAttackGame>
 ) {
     socket.on('game:join', ({ nickname, roomId }) => {
         const targetRoomId = roomId || uuidv4();

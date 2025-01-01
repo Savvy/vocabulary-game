@@ -5,7 +5,7 @@ import cors from 'cors';
 import { config } from 'dotenv';
 import { ClientToServerEvents, ServerToClientEvents } from '@vocab/shared';
 import { setupGameHandlers } from './handlers/gameHandlers';
-import { GameRoom } from './types/GameRoom';
+import { TimeAttackGame } from '@vocab/game-engine';
 
 config();
 
@@ -21,7 +21,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 });
 
 // Game state management
-const gameRooms = new Map<string, GameRoom>();
+const gameRooms = new Map<string, TimeAttackGame>();
 
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
