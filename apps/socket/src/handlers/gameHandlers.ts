@@ -5,6 +5,7 @@ import {
     ServerToClientEvents} from '@vocab/shared';
 import { TimeAttackGame } from '@vocab/game-engine';
 import { getRandomWordsByCategory, getAllCategories } from '@vocab/database';
+import { GameConfig } from '@vocab/game-engine/src/types';
 
 
 export function setupGameHandlers(
@@ -138,6 +139,24 @@ export function setupGameHandlers(
             io.to(state.roomId).emit('game:state', game.getState());
         } catch (error) {
             socket.emit('game:error', error instanceof Error ? error.message : 'Failed to start game');
+        }
+    });
+
+    socket.on('game:updateConfig', (config: Partial<GameConfig>) => {
+        const game = findGameBySocketId(socket.id, games);
+        if (!game) return;
+
+        const player = game.getState().players.find(p => p.id === socket.id);
+        if (!player?.isHost) {
+            socket.emit('game:error', 'Only the host can update game settings');
+            return;
+        }
+
+        try {
+            game.updateConfig(config);
+            io.to(game.getState().roomId).emit('game:state', game.getState());
+        } catch (error) {
+            socket.emit('game:error', error instanceof Error ? error.message : 'Failed to update config');
         }
     });
 

@@ -29,6 +29,8 @@ export interface BaseGameState {
     timeRemaining?: number;
     scores: Record<string, number>;
     maxPlayers: number;
+    roundTimeLimit: number;
+    inputType: 'multiple-choice' | 'single-choice';
 }
 
 // Socket Events (keep as is)
@@ -43,6 +45,13 @@ export type ServerToClientEvents = {
     'game:error': (message: string) => void;
 };
 
+export interface GameConfig {
+    maxPlayers: number;
+    roundTimeLimit: number;
+    maxRounds: number;
+    inputType: 'multiple-choice' | 'single-choice';
+}
+
 export type ClientToServerEvents = {
     'game:join': (payload: { nickname: string; roomId?: string }) => void;
     'game:leave': () => void;
@@ -50,6 +59,7 @@ export type ClientToServerEvents = {
     'game:answer': (answer: string) => void;
     'game:startGame': () => void;
     'game:startTurn': () => void;
+    'game:updateConfig': (config: Partial<GameConfig>) => void;
 };
 
 export interface TimeAttackState extends BaseGameState {

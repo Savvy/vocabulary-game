@@ -1,4 +1,5 @@
 import { BaseGame } from '../../BaseGame.js';
+import { GameConfig } from '../../types/index.js';
 import { TimeAttackState, TimeAttackAction } from './types';
 import { Word } from '@vocab/shared';
 
@@ -12,7 +13,8 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 maxPlayers: 8,
                 minPlayers: 1,
                 roundTimeLimit: 30,
-                maxRounds: 2, // Temporary for testing
+                maxRounds: 3,
+                inputType: 'multiple-choice',
                 scoreSystem: {
                     basePoints: 1,
                     timeBonus: false,
@@ -26,7 +28,8 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 status: 'waiting',
                 wordsAnswered: {},
                 roundTimeLimit: 30,
-                maxPlayers: 8
+                maxPlayers: 8,
+                inputType: 'multiple-choice'
             }
         );
     }
@@ -237,5 +240,24 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
 
     setWordQueue(words: Word[]): void {
         this.wordQueue = words;
+    }
+
+    // Add a method to update config
+    updateConfig(config: Partial<GameConfig>): void {
+        if (this.state.status !== 'waiting') {
+            throw new Error('Cannot update config after game has started');
+        }
+        
+        Object.assign(this.config, config);
+        
+        // Update relevant state properties
+        this.state.maxPlayers = config.maxPlayers ?? this.state.maxPlayers;
+        this.state.roundTimeLimit = config.roundTimeLimit ?? this.state.roundTimeLimit;
+        this.state.maxRounds = config.maxRounds ?? this.state.maxRounds;
+        this.state.inputType = config.inputType ?? this.state.inputType;
+
+        console.log('[Game] Updated config', this.state);
+        
+        this.onStateChange?.(this.state);
     }
 } 

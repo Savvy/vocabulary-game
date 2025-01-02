@@ -18,6 +18,7 @@ export interface GameConfig {
     roundTimeLimit: number;
     maxRounds: number;
     scoreSystem: ScoreSystem;
+    inputType: 'multiple-choice' | 'single-choice';
 }
 
 export interface ScoreSystem {

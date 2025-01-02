@@ -13,7 +13,7 @@ interface WordDisplayProps {
     isCurrentTurn: boolean;
     lastAnswer: { text: string; isCorrect: boolean | null };
     onAnswer: (answer: string) => void;
-    inputType: 'type' | 'multiple-choice';
+    inputType: 'multiple-choice' | 'single-choice';
 }
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -72,7 +72,7 @@ export function WordDisplay({
                     )}
                 </AnimatePresence>
 
-                {inputType === 'type' && (
+                {inputType === 'single-choice' && (
                     <form onSubmit={handleSubmit} className="flex gap-2">
                         <Input
                             value={input}
@@ -88,7 +88,6 @@ export function WordDisplay({
                         </Button>
                     </form>
                 )}
-
                 {inputType === 'multiple-choice' && (
                     <div className="grid grid-cols-2 gap-4">
                         {options.map((option) => (
