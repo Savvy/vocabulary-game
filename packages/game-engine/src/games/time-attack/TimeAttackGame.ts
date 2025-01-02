@@ -25,7 +25,8 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 currentRound: 0,
                 status: 'waiting',
                 wordsAnswered: {},
-                roundTimeLimit: 30
+                roundTimeLimit: 30,
+                maxPlayers: 8
             }
         );
     }

@@ -25,7 +25,8 @@ const initialState: TimeAttackState = {
     wordsAnswered: {},
     timeRemaining: 30,
     roundTimeLimit: 30,
-    hasStartedTurn: false
+    hasStartedTurn: false,
+    maxPlayers: 8
 };
 
 type GameAction =
@@ -58,7 +59,8 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
                 hasStartedTurn: action.payload.hasStartedTurn,
                 players: action.payload.players || state.players,
                 scores: action.payload.scores || state.scores,
-                wordsAnswered: action.payload.wordsAnswered || state.wordsAnswered
+                wordsAnswered: action.payload.wordsAnswered || state.wordsAnswered,
+                maxPlayers: action.payload.maxPlayers || state.maxPlayers
             };
         case 'ADD_PLAYER':
             if (state.players.some(p => p.id === action.payload.id)) {

@@ -28,6 +28,7 @@ export interface BaseGameState {
     currentTurn?: string;
     timeRemaining?: number;
     scores: Record<string, number>;
+    maxPlayers: number;
 }
 
 // Socket Events (keep as is)

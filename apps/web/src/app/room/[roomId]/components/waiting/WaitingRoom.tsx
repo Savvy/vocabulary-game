@@ -19,7 +19,7 @@ export default function WaitingRoom({ state, isHost, startGame }: {
             <WaitingRoomHeader
                 title="Time Attack"
                 // TODO: get max players from backend
-                playerRange={`${state.players.length} / 4`}
+                playerRange={`${state.players.length} / ${state.maxPlayers}`}
                 roomId={state.roomId}
             />
             <div className="text-center">

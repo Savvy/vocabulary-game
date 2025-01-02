@@ -15,6 +15,7 @@ export abstract class BaseGame<TState extends BaseGameState, TAction> implements
             maxRounds: config.maxRounds,
             scores: {},
             timeRemaining: config.roundTimeLimit,
+            maxPlayers: config.maxPlayers,
             ...initialState
         } as unknown as TState;
     }
