@@ -1,13 +1,13 @@
 'use client';
 
 import { Player } from '@vocab/shared';
-import { Card } from '@/components/ui/card';
-import { Trophy, Medal, Award } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRight, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
+import { GameStats } from './GameStats';
+import { PlayerResult } from './PlayerResult';
 
 interface GameEndViewProps {
     players: Player[];
@@ -20,83 +20,81 @@ export function GameEndView({ players, wordsAnswered, scores }: GameEndViewProps
 
     // Sort players by score
     const sortedPlayers = [...players].sort((a, b) => scores[b.id] - scores[a.id]);
-    const winner = sortedPlayers[0];
+    // const winner = sortedPlayers[0];
 
     useEffect(() => {
         // Trigger confetti for winner celebration
         confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.3 },
+            zIndex: -1
         });
     }, []);
 
-    const getPlayerIcon = (index: number) => {
+    /* const getPlayerIcon = (index: number) => {
         switch (index) {
             case 0: return <Trophy className="h-8 w-8 text-yellow-500" />;
             case 1: return <Medal className="h-8 w-8 text-gray-400" />;
             case 2: return <Award className="h-8 w-8 text-amber-700" />;
             default: return null;
         }
-    };
+    }; */
 
     return (
-        <div className="flex flex-col items-center gap-8 w-full max-w-5xl mx-auto">
-            <Card className="w-full p-6 text-center">
-                <motion.div
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="flex flex-col items-center gap-4"
-                >
-                    <Trophy className="h-16 w-16 text-yellow-500" />
-                    <h1 className="text-3xl font-bold">Game Over!</h1>
-                    <p className="text-xl">
-                        🎉 Winner: <span className="font-bold">{winner.nickname}</span>
-                    </p>
-                </motion.div>
-            </Card>
-
-            <Card className="w-full p-6">
-                <h2 className="text-xl font-bold mb-4">Final Results</h2>
-                <div className="space-y-4">
-                    {sortedPlayers.map((player, index) => {
-                        const stats = wordsAnswered[player.id] || { correct: 0, total: 0 };
-                        const accuracy = stats.total > 0
-                            ? ((stats.correct / stats.total) * 100).toFixed(0)
-                            : '0';
-
-                        return (
-                            <motion.div
-                                key={player.id}
-                                initial={{ x: -20, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="flex items-center justify-between p-4 rounded-lg bg-muted"
-                            >
-                                <div className="flex items-center gap-4">
-                                    {getPlayerIcon(index)}
-                                    <div>
-                                        <p className="font-semibold">{player.nickname}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {stats.correct}/{stats.total} words • {accuracy}% accuracy
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="text-2xl font-bold">
-                                    {scores[player.id]} pts
-                                </div>
-                            </motion.div>
-                        );
-                    })}
+        <div className="max-w-2xl mx-auto p-6 relative">
+            <div className="text-center mb-12">
+                <div className="inline-block p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 
+                       to-yellow-500/20 border border-amber-500/20 mb-4">
+                    <Trophy className="w-8 h-8 text-amber-400" />
                 </div>
-            </Card>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-amber-200 
+                       bg-clip-text text-transparent mb-2">
+                    Game Over!
+                </h1>
+                <p className="text-indigo-300/80">Here&apos;s how everyone performed</p>
+            </div>
 
-            <Button 
+            <div className="grid gap-6 mb-8 relative z-10">
+                {sortedPlayers.map((player, index) => (
+                    <PlayerResult
+                        key={player.id}
+                        rank={index + 1}
+                        nickname={player.nickname}
+                        score={scores[player.id]}
+                        words={wordsAnswered[player.id].total}
+                        isWinner={index === 0}
+                    />
+                ))}
+            </div>
+
+            <GameStats
+                totalWords={45}
+                totalTime="5:32"
+                categories={['Animals', 'Food', 'Sports']}
+            />
+
+            {/* <button
+                onClick={onPlayAgain}
+                className="w-full group relative py-3 px-6 rounded-xl bg-indigo-500 
+                   hover:bg-indigo-400 text-white font-medium transition-all 
+                   overflow-hidden mt-8"
+            >
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 
+                       to-violet-400/20 opacity-0 group-hover:opacity-100 
+                       transition-opacity" />
+                <span className="relative flex items-center justify-center gap-2">
+                    Play Again
+                    <ArrowRight className="w-5 h-5" />
+                </span>
+            </button> */}
+             <Button 
                 size="lg" 
                 onClick={() => router.push('/')}
-                className="mt-4"
+                className="mt-8 w-full py-3 px-6 font-bold group"
             >
                 Play Again
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
         </div>
     );

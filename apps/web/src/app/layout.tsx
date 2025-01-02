@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={cn(
         inter.className,
         "dark",
-        "min-h-screen antialiased relative overflow-hidden bg-background"
+        "min-h-screen antialiased relative bg-background"
       )}>
         {/* Gradient blobs */}
         <div className="relative z-10 min-h-screen backdrop-blur-3xl bg-background/50">

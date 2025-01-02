@@ -40,6 +40,9 @@ export abstract class BaseGame<TState extends BaseGameState, TAction> implements
         if (this.state.players.length >= this.config.maxPlayers) {
             throw new Error('Room is full');
         }
+        if (this.state.players.find(p => p.id === player.id)) {
+            return;
+        }
         this.state.players.push(player);
         this.state.scores[player.id] = 0;
         console.log('[Game] Player added', player, this.state.players);

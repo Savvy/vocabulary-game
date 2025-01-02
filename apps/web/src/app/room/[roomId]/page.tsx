@@ -25,6 +25,7 @@ export default function GameRoom() {
             console.log('RoomId:', roomId, session?.roomId)
             return;
         }
+        console.log('Session:', session.roomId, roomId, state.roomId)
         joinGame(session.nickname, session.roomId)
         redirectToGame(session.roomId)
     }, [])
