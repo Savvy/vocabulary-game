@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Word } from '@vocab/shared';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface WordDisplayProps {
@@ -15,6 +15,15 @@ interface WordDisplayProps {
     onAnswer: (answer: string) => void;
     inputType: 'type' | 'multiple-choice';
 }
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
 
 export function WordDisplay({
     word, isCurrentTurn, lastAnswer, onAnswer, inputType,
@@ -28,6 +37,10 @@ export function WordDisplay({
             setInput('');
         }
     };
+
+    const options = useMemo(() => {
+        return shuffleArray(word.options);
+    }, [word.options]);
 
     return (
         <Card className="w-full p-6">
@@ -78,7 +91,7 @@ export function WordDisplay({
 
                 {inputType === 'multiple-choice' && (
                     <div className="grid grid-cols-2 gap-4">
-                        {word.options.map((option) => (
+                        {options.map((option) => (
                             <Button
                                 key={option}
                                 onClick={() => onAnswer(option)}

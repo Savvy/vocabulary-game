@@ -2,19 +2,23 @@ import { Medal, Crown } from 'lucide-react';
 
 interface PlayerResultProps {
     nickname: string;
-    score: number;
-    words: number;
+    wordsCorrect: number;
+    totalWords: number;
     rank: number;
     isWinner?: boolean;
 }
 
-export function PlayerResult({ nickname, score, words, rank, isWinner }: PlayerResultProps) {
+export function PlayerResult({ nickname, wordsCorrect, totalWords, rank, isWinner }: PlayerResultProps) {
     const getRankIcon = () => {
         if (isWinner) return <Crown className="w-5 h-5 text-amber-400" />;
         if (rank === 2) return <Medal className="w-5 h-5 text-slate-400" />;
         if (rank === 3) return <Medal className="w-5 h-5 text-amber-700" />;
         return null;
     };
+
+    const accuracy = totalWords > 0
+        ? ((wordsCorrect / totalWords) * 100).toFixed(0)
+        : '0';
 
     return (
         <div className={`relative rounded-xl p-4 border transition-all
@@ -37,12 +41,12 @@ export function PlayerResult({ nickname, score, words, rank, isWinner }: PlayerR
                                 </span>
                             )}
                         </h3>
-                        <p className="text-indigo-300/80 text-sm">{words} words</p>
+                        <p className="text-indigo-300/80 text-sm">{wordsCorrect} / {totalWords} words</p>
                     </div>
                 </div>
                 <div className="text-3xl font-bold bg-gradient-to-r from-white to-indigo-200 
                      bg-clip-text text-transparent">
-                    {score}%
+                    {accuracy}%
                 </div>
             </div>
         </div>

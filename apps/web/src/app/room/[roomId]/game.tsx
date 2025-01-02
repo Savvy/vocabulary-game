@@ -45,6 +45,7 @@ export function TimeAttackGame() {
                 players={state.players}
                 wordsAnswered={state.wordsAnswered}
                 scores={state.scores}
+                rounds={state.maxRounds}
             />
         );
     }

@@ -13,14 +13,34 @@ interface GameEndViewProps {
     players: Player[];
     wordsAnswered: Record<string, { correct: number; total: number; }>;
     scores: Record<string, number>;
+    rounds: number;
 }
 
-export function GameEndView({ players, wordsAnswered, scores }: GameEndViewProps) {
+export function GameEndView({ players, wordsAnswered, scores, rounds }: GameEndViewProps) {
     const router = useRouter();
 
     // Sort players by score
-    const sortedPlayers = [...players].sort((a, b) => scores[b.id] - scores[a.id]);
-    // const winner = sortedPlayers[0];
+    // const sortedPlayers = [...players].sort((a, b) => scores[b.id] - scores[a.id]);
+    const sortedPlayers = [...players].sort((a, b) => {
+        const playerA = wordsAnswered[a.id];
+        const playerB = wordsAnswered[b.id];
+
+        // Calculate accuracy percentage (avoid division by zero)
+        const accuracyA = playerA.total > 0 ? (playerA.correct / playerA.total) : 0;
+        const accuracyB = playerB.total > 0 ? (playerB.correct / playerB.total) : 0;
+
+        // Final score combines correct answers and accuracy
+        const scoreA = (playerA.correct * 100) + (accuracyA * 50);
+        const scoreB = (playerB.correct * 100) + (accuracyB * 50);
+
+        return scoreB - scoreA;
+    });
+
+    /* 
+    
+    
+    
+    */
 
     useEffect(() => {
         // Trigger confetti for winner celebration
@@ -28,7 +48,6 @@ export function GameEndView({ players, wordsAnswered, scores }: GameEndViewProps
             particleCount: 150,
             spread: 100,
             origin: { y: 0.3 },
-            zIndex: -1
         });
     }, []);
 
@@ -61,17 +80,17 @@ export function GameEndView({ players, wordsAnswered, scores }: GameEndViewProps
                         key={player.id}
                         rank={index + 1}
                         nickname={player.nickname}
-                        score={scores[player.id]}
-                        words={wordsAnswered[player.id].total}
+                        wordsCorrect={wordsAnswered[player.id].correct}
+                        totalWords={wordsAnswered[player.id].total}
                         isWinner={index === 0}
                     />
                 ))}
             </div>
 
             <GameStats
-                totalWords={45}
+                totalWords={Object.values(wordsAnswered).reduce((acc, curr) => acc + curr.total, 0)}
                 totalTime="5:32"
-                categories={['Animals', 'Food', 'Sports']}
+                rounds={rounds}
             />
 
             {/* <button
@@ -88,8 +107,8 @@ export function GameEndView({ players, wordsAnswered, scores }: GameEndViewProps
                     <ArrowRight className="w-5 h-5" />
                 </span>
             </button> */}
-             <Button 
-                size="lg" 
+            <Button
+                size="lg"
                 onClick={() => router.push('/')}
                 className="mt-8 w-full py-3 px-6 font-bold group"
             >
