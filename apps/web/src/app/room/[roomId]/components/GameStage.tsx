@@ -29,8 +29,8 @@ export function GameStage({
                     <RouletteWheel onSpinComplete={onSpinComplete} />
                 </div>
             ) : (
-                <div className="text-center">
-                    <h4 className="text-lg font-semibold mb-4">
+                <div className="text-center space-y-4">
+                    <h4 className="text-lg font-semibold">
                         Category: {category}
                     </h4>
                     {!hasStartedTurn && (

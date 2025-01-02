@@ -16,7 +16,7 @@ interface GameEndViewProps {
     rounds: number;
 }
 
-export function GameEndView({ players, wordsAnswered, scores, rounds }: GameEndViewProps) {
+export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps) {
     const router = useRouter();
 
     // Sort players by score

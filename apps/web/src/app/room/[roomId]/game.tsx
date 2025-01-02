@@ -24,11 +24,18 @@ export function TimeAttackGame() {
     useEffect(() => {
         const currentTurnId = state.currentTurn;
 
-        if (state.status === 'playing' &&
-            lastTurn &&
+        const isTurnChange = lastTurn &&
             lastTurn !== currentTurnId &&
-            state.wordsAnswered[lastTurn]
-        ) {
+            state.wordsAnswered[lastTurn]?.total > 0 &&
+            state.status === 'playing';
+
+        const isRoundChange = state.currentRound > 1 &&
+            !state.category &&
+            !state.currentWord &&
+            state.status === 'playing' &&
+            state.currentTurn;
+
+        if (isRoundChange || isTurnChange) {
             setShowTurnEnd(true);
             const timer = setTimeout(() => setShowTurnEnd(false), 2000);
             return () => clearTimeout(timer);
@@ -37,7 +44,7 @@ export function TimeAttackGame() {
         if (currentTurnId !== lastTurn) {
             setLastTurn(currentTurnId || null);
         }
-    }, [state.currentTurn, state.status, state.wordsAnswered, lastTurn]);
+    }, [state.currentTurn, state.currentRound, state.status, state.wordsAnswered, state.currentWord, state.category, lastTurn]);
 
     if (state.status === 'finished') {
         return (
