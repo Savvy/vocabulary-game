@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useGame } from '@/contexts/GameContext'
 import { useToast } from '@/hooks/use-toast'
 import { useSocket } from '@/hooks/useSocket'
@@ -14,6 +14,10 @@ export default function Home() {
   const { toast } = useToast()
   const router = useRouter()
   const { socket } = useSocket()
+  const searchParams = useSearchParams()
+  const roomId = searchParams.get('roomId')
+
+  console.log('roomId', roomId)
 
   const handleSubmit = async ({ nickname, roomId }: { nickname: string, roomId?: string }) => {
     if (!nickname.trim()) {
@@ -91,6 +95,7 @@ export default function Home() {
         <GameForm
           isSubmitting={isSubmitting}
           handleSubmit={handleSubmit}
+          defaultRoomId={roomId}
         />
       </div>
     </div>

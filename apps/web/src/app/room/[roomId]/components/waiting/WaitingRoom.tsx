@@ -7,15 +7,15 @@ import { Play, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import WaitingRoomHeader from './Header'
 import { AnimatePresence } from 'framer-motion'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { CopyButton } from '@/components/CopyButton'
 
 export default function WaitingRoom({ state, isHost, startGame }: {
     host?: Player, state: TimeAttackState, isHost: boolean, startGame: () => void
 }) {
     return (
         <div className="max-w-2xl mx-auto p-6 space-y-12">
-            {/* <h1 className="text-2xl text-center font-bold mb-8">
-                GameRoom - Host: {host?.nickname}, Status: {state.status}
-            </h1> */}
             <WaitingRoomHeader
                 title="Time Attack"
                 // TODO: get max players from backend
@@ -41,15 +41,7 @@ export default function WaitingRoom({ state, isHost, startGame }: {
                     "grid gap-4 mt-8",
                     isHost ? "grid-cols-2" : "grid-cols-1"
                 )}>
-                    <Button
-                        onClick={startGame}
-                        variant={'secondary'}
-                        size={'lg'}
-                        className='bg-secondary/30 backdrop-blur h-12'
-                    >
-                        <UserPlus className="w-5 h-5 mr-2 text-indigo-400" />
-                        Invite Friends
-                    </Button>
+                    <InviteFriendsDialog roomId={state.roomId} />
                     {isHost && (
                         <Button
                             onClick={startGame}
@@ -65,5 +57,45 @@ export default function WaitingRoom({ state, isHost, startGame }: {
                 </div>
             </div>
         </div>
+    )
+}
+
+function InviteFriendsDialog({ roomId }: { roomId: string }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button
+                    variant={'secondary'}
+                    size={'lg'}
+                    className='bg-secondary/30 backdrop-blur h-12'
+                >
+                    <UserPlus className="w-5 h-5 mr-2 text-indigo-400" />
+                    Invite Friends
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Invite Friends</DialogTitle>
+                </DialogHeader>
+                <DialogDescription>
+                    Invite your friends to join the game.
+                </DialogDescription>
+                <div className="flex flex-row gap-2">
+                    <Input
+                        placeholder="Copy link"
+                        value={`${window.location.origin}?roomId=${roomId}`}
+                        className='flex-grow'
+                        readOnly
+                        disabled
+                    />
+                    <CopyButton
+                        text={`${window.location.origin}?roomId=${roomId}`}
+                        description="Room ID copied to clipboard"
+                        variant="outline"
+                        
+                    />
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }

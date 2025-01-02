@@ -18,14 +18,15 @@ type FormValues = z.infer<typeof formSchema>
 type GameFormProps = {
     handleSubmit: (data: FormValues) => void
     isSubmitting?: boolean
+    defaultRoomId?: string | null
 }
 
-export default function GameForm({ handleSubmit, isSubmitting = false }: GameFormProps) {
+export default function GameForm({ handleSubmit, isSubmitting = false, defaultRoomId }: GameFormProps) {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             nickname: "",
-            roomId: ""
+            roomId: defaultRoomId || ""
         }
     })
 

@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import type { ButtonProps } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface CopyButtonProps extends ButtonProps {
     text: string;
-    children: React.ReactNode;
+    description?: string;
+    variant?: ButtonProps['variant'];
+    children?: React.ReactNode;
+    iconClassName?: string;
 }
 
-export function CopyButton({ text, children, ...props }: CopyButtonProps) {
+export function CopyButton({ text, children, description, variant = 'default', iconClassName, ...props }: CopyButtonProps) {
     const [isCopied, setIsCopied] = useState(false);
     const { toast } = useToast();
 
@@ -20,12 +23,12 @@ export function CopyButton({ text, children, ...props }: CopyButtonProps) {
             setIsCopied(true);
             toast({
                 title: "Copied!",
-                description: "Room ID copied to clipboard",
+                description: description || "Room ID copied to clipboard",
             });
 
             // Reset copy state after 2 seconds
             setTimeout(() => setIsCopied(false), 2000);
-        } catch (err) {
+        } catch {
             toast({
                 variant: "destructive",
                 title: "Failed to copy",
@@ -37,16 +40,27 @@ export function CopyButton({ text, children, ...props }: CopyButtonProps) {
     return (
         <Button
             onClick={handleCopy}
+            variant={variant}
             {...props}
         >
             {isCopied ? (
-                <Check className="w-4 h-4 mr-2 text-green-400" />
+                <Check className={cn(
+                    "w-4 h-4 text-green-400",
+                    {"mr-2": !!children},
+                    iconClassName
+                )}
+                />
             ) : (
-                <Copy className="w-4 h-4 mr-2 text-indigo-400" />
+                <Copy className={cn(
+                    "w-4 h-4 text-indigo-400",
+                    {"mr-2": !!children},
+                    iconClassName
+                )}
+                />
             )}
-            <span className="text-sm font-medium text-indigo-300">
+            {children ? <span className="text-sm font-medium text-indigo-300">
                 {children}
-            </span>
+            </span> : null}
         </Button>
     );
 }
