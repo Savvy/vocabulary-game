@@ -19,7 +19,7 @@ export default function GameRoom() {
 
     useEffect(() => {
         const session = getSession()
-        if (!session || session.roomId !== roomId) {
+        if (!session || session.roomId !== roomId || state.roomId === roomId) {
             console.log('Session not found or roomId does not match')
             console.log('Session:', session)
             console.log('RoomId:', roomId, session?.roomId)

@@ -201,6 +201,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (!socket) return;
         
         const handleConnect = () => {
+            console.log('[Socket] Joining game', nickname, roomId);
             socket.emit('game:join', { nickname, roomId });
             saveSession(nickname, roomId || '');
         };
@@ -211,7 +212,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             socket.connect();
             socket.once('connect', handleConnect);
         }
-    }, [socket, saveSession]);
+    }, [socket]);
 
     const leaveGame = useCallback(() => {
         if (!socket) return;
