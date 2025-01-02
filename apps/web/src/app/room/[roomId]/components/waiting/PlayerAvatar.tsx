@@ -1,7 +1,6 @@
 "use client"; // Required for Framer Motion
 import { motion } from "framer-motion";
 import { cn } from '@/lib/utils';
-import { User } from 'lucide-react';
 
 interface PlayerAvatarProps {
     nickname: string
@@ -10,9 +9,9 @@ interface PlayerAvatarProps {
 
 export function PlayerAvatar({ nickname, isHost }: PlayerAvatarProps) {
     return (
-        <motion.div 
+        <motion.div
             initial={{ scale: 0, opacity: 0 }}
-            animate={{ 
+            animate={{
                 scale: [0, 1.35, 1],
                 opacity: [0, 1, 1]
             }}
@@ -26,11 +25,16 @@ export function PlayerAvatar({ nickname, isHost }: PlayerAvatarProps) {
         >
             <div className="relative">
                 <div className={cn(
-                    "w-20 h-20 rounded-full bg-[#1a2333] border border-indigo-500/20",
+                    "w-20 h-20 rounded-full overflow-hidden bg-[#1a2333] border border-indigo-500/20",
                     "flex items-center justify-center shadow-lg shadow-indigo-500/10",
                     "group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300"
-                )}> 
-                    <User className="w-10 h-10 text-indigo-400" />
+                )}>
+                    {/* <User className="w-10 h-10 text-indigo-400" /> */}
+                    <img
+                        src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${nickname.replace(/\s+/g, '+')}`}
+                        alt="avatar"
+                        className="h-full w-full"
+                    />
                 </div>
                 {/* {status === 'ready' && (
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-400 rounded-full 
