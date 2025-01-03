@@ -5,7 +5,8 @@ export async function createWord(data: {
     translation: string;
     imageUrl: string;
     categoryId: string;
-    languageId: string;
+    sourceLanguageId: string;
+    targetLanguageId: string;
     options: string[];
 }) {
     return prisma.word.create({
@@ -15,11 +16,13 @@ export async function createWord(data: {
             imageUrl: data.imageUrl,
             options: data.options,
             category: { connect: { id: data.categoryId } },
-            language: { connect: { id: data.languageId } }
+            sourceLanguage: { connect: { id: data.sourceLanguageId } },
+            targetLanguage: { connect: { id: data.targetLanguageId } }
         },
         include: {
             category: true,
-            language: true,
+            sourceLanguage: true,
+            targetLanguage: true,
         },
     });
 }
@@ -40,7 +43,7 @@ export async function getRandomWordsByCategory(
     const words = await prisma.word.findMany({
         where: {
             categoryId,
-            languageId: language.id,
+            sourceLanguageId: language.id,
         },
         take: count,
         orderBy: {
@@ -48,7 +51,8 @@ export async function getRandomWordsByCategory(
         },
         include: {
             category: true,
-            language: true,
+            sourceLanguage: true,
+            targetLanguage: true,
         },
     });
 
