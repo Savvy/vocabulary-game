@@ -2,9 +2,10 @@ import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import {
     ClientToServerEvents,
-    ServerToClientEvents} from '@vocab/shared';
+    ServerToClientEvents
+} from '@vocab/shared';
 import { TimeAttackGame } from '@vocab/game-engine';
-import { getRandomWordsByCategory, getAllCategories } from '@vocab/database';
+import { getRandomWordsByCategory, getRandomCategories } from '@vocab/database';
 import { GameConfig } from '@vocab/game-engine/src/types';
 
 
@@ -13,7 +14,7 @@ export function setupGameHandlers(
     socket: Socket<ClientToServerEvents, ServerToClientEvents>,
     games: Map<string, TimeAttackGame>
 ) {
-    socket.on('game:join', ({ nickname, roomId }) => {
+    socket.on('game:join', async ({ nickname, roomId }) => {
         const targetRoomId = roomId || uuidv4();
         let game = games.get(targetRoomId);
 
@@ -22,7 +23,8 @@ export function setupGameHandlers(
                 socket.emit('game:error', 'Game not found');
                 return;
             }
-            game = new TimeAttackGame(targetRoomId);
+            const categories = await getRandomCategories();
+            game = new TimeAttackGame(targetRoomId, categories);
             game.onStateChange = (state) => {
                 io.to(targetRoomId).emit('game:state', state);
             };
@@ -44,7 +46,34 @@ export function setupGameHandlers(
         socket.emit('game:state', game.getState());
     });
 
-    socket.on('game:spinWheel', async () => {
+   /*  socket.on('game:join', async ({ nickname, roomId }) => {
+        let game: TimeAttackGame;
+
+        if (roomId && games.has(roomId)) {
+            game = games.get(roomId)!;
+        } else {
+            const newRoomId = roomId || uuidv4();
+            game = new TimeAttackGame(newRoomId);
+            const categories = await getRandomCategories();
+            game.updateConfig({ categories }); // Add categories to game state
+            games.set(newRoomId, game);
+        }
+
+        const player = {
+            id: socket.id,
+            nickname,
+            score: 0,
+            roomId: game.getState().roomId,
+            isHost: game.getState().players.length === 0
+        };
+
+        game.addPlayer(player);
+        socket.join(game.getState().roomId);
+        io.to(game.getState().roomId).emit('game:playerJoined', player);
+        socket.emit('game:state', game.getState());
+    }); */
+
+    socket.on('game:spinWheel', async ({ category, categoryId }) => {
         console.log('Received game:spinWheel event');
         const game = findGameBySocketId(socket.id, games);
         if (!game) {
@@ -57,19 +86,16 @@ export function setupGameHandlers(
             return;
         }
 
-        const categories = await getAllCategories();
-        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-        
         game.dispatch({
             type: 'SPIN_WHEEL',
-            payload: { 
+            payload: {
                 playerId: socket.id,
-                category: randomCategory.name,
-                categoryId: randomCategory.id
+                category,
+                categoryId
             }
         });
 
-        io.to(game.getState().roomId).emit('game:wheelSpun', randomCategory.name);
+        io.to(game.getState().roomId).emit('game:wheelSpun', category);
     });
 
     socket.on('game:startTurn', async () => {
@@ -94,14 +120,14 @@ export function setupGameHandlers(
             language: w.language.code,
             options: w.options
         }));
-        
+
         game.setWordQueue(words);
         console.log('[Socket] Set word queue', words);
         game.dispatch({
             type: 'START_TURN',
             payload: { playerId: socket.id }
         });
-        
+
         // Broadcast updated state to all players in the room
         io.to(game.getState().roomId).emit('game:state', game.getState());
     });
@@ -112,9 +138,9 @@ export function setupGameHandlers(
 
         game.dispatch({
             type: 'SUBMIT_ANSWER',
-            payload: { 
+            payload: {
                 playerId: socket.id,
-                answer 
+                answer
             }
         });
     });
@@ -125,7 +151,7 @@ export function setupGameHandlers(
 
         const state = game.getState();
         const player = state.players.find(p => p.id === socket.id);
-        
+
         if (!player?.isHost) {
             socket.emit('game:error', 'Only the host can start the game');
             return;
@@ -134,7 +160,7 @@ export function setupGameHandlers(
         try {
             // Start the game using the game engine
             game.start();
-            
+
             // Emit updated state to all players in the room
             io.to(state.roomId).emit('game:state', game.getState());
         } catch (error) {

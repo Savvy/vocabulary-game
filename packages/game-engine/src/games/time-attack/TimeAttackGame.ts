@@ -7,7 +7,14 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
     private wordQueue: Word[] = [];
     private timer: ReturnType<typeof setInterval> | null = null;
 
-    constructor(roomId: string) {
+    constructor(roomId: string, categories: Array<{
+        id: string;
+        name: string;
+        style?: {
+            backgroundColor: string;
+            textColor: string;
+        };
+    }>) {
         super(
             {
                 maxPlayers: 8,
@@ -29,7 +36,8 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                 wordsAnswered: {},
                 roundTimeLimit: 30,
                 maxPlayers: 8,
-                inputType: 'multiple-choice'
+                inputType: 'multiple-choice',
+                categories: categories
             }
         );
     }

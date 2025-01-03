@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import {
     AlertDialog,
     AlertDialogContent,
+    AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
@@ -22,6 +23,14 @@ interface GameConfig {
     roundTimeLimit: number
     maxRounds: number
     inputType: 'multiple-choice' | 'single-choice'
+    categories: Array<{
+        id: string
+        name: string
+        style?: {
+            backgroundColor: string
+            textColor: string
+        }
+    }>
 }
 
 interface GameConfigDialogProps {
@@ -58,6 +67,9 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
             <AlertDialogContent className="sm:max-w-[450px]">
                 <AlertDialogHeader>
                     <AlertDialogTitle>Game Configuration</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Configure the game settings and categories.
+                    </AlertDialogDescription>
                 </AlertDialogHeader>
                 <div className="grid gap-6 py-4">
                     <div className="grid gap-2">

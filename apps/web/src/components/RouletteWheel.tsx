@@ -7,26 +7,30 @@ import { RotateCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const Wheel = dynamic(
-  () => import('react-custom-roulette').then(mod => mod.Wheel),
-  { ssr: false }
+    () => import('react-custom-roulette').then(mod => mod.Wheel),
+    { ssr: false }
 )
 
 interface RouletteWheelProps {
-    onSpinComplete: (category: string) => void
+    categories: Array<{
+        id: string;
+        name: string;
+        style?: {
+            backgroundColor: string;
+            textColor: string;
+        };
+    }>;
+    onSpinComplete: (category: string, categoryId: string) => void;
 }
 
-export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
+export function RouletteWheel({ categories, onSpinComplete }: RouletteWheelProps) {
     const [mustSpin, setMustSpin] = useState(false)
     const [prizeNumber, setPrizeNumber] = useState(0)
 
-    const data = [
-        { option: 'Animals', style: { backgroundColor: '#FF6B6B', textColor: 'white' } },
-        { option: 'Food', style: { backgroundColor: '#4ECDC4', textColor: 'white' } },
-        { option: 'Sports', style: { backgroundColor: '#45B7D1', textColor: 'white' } },
-        { option: 'Professions', style: { backgroundColor: '#96CEB4', textColor: 'white' } },
-        { option: 'Transportation', style: { backgroundColor: '#FFEEAD', textColor: 'black' } },
-        { option: 'Household', style: { backgroundColor: '#D4A5A5', textColor: 'white' } }
-    ]
+    const data = categories.map(cat => ({
+        option: cat.name,
+        style: cat.style || { backgroundColor: '#4ECDC4', textColor: 'white' }
+    }))
 
     const handleSpinClick = () => {
         if (!mustSpin) {
@@ -38,7 +42,7 @@ export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
 
     const handleSpinComplete = () => {
         setMustSpin(false)
-        onSpinComplete(data[prizeNumber].option)
+        onSpinComplete(categories[prizeNumber].name, categories[prizeNumber].id)
     }
 
     return (
@@ -55,8 +59,8 @@ export function RouletteWheel({ onSpinComplete }: RouletteWheelProps) {
                     fontSize={16}
                 />
             </div>
-            <Button 
-                onClick={handleSpinClick} 
+            <Button
+                onClick={handleSpinClick}
                 disabled={mustSpin}
                 size="lg"
             >

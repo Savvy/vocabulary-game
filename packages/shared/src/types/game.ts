@@ -55,7 +55,7 @@ export interface GameConfig {
 export type ClientToServerEvents = {
     'game:join': (payload: { nickname: string; roomId?: string }) => void;
     'game:leave': () => void;
-    'game:spinWheel': () => void;
+    'game:spinWheel': (payload: { category: string; categoryId: string }) => void;
     'game:answer': (answer: string) => void;
     'game:startGame': () => void;
     'game:startTurn': () => void;
@@ -73,5 +73,13 @@ export interface TimeAttackState extends BaseGameState {
     wordsAnswered: Record<string, { 
         correct: number;
         total: number;
+    }>;
+    categories: Array<{
+        id: string;
+        name: string;
+        style?: {
+            backgroundColor: string;
+            textColor: string;
+        };
     }>;
 }

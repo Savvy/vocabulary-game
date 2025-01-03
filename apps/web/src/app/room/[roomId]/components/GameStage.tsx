@@ -6,18 +6,27 @@ import { RouletteWheel } from '@/components/RouletteWheel';
 
 interface GameStageProps {
     isCurrentTurn: boolean;
+    categories: Array<{
+        id: string;
+        name: string;
+        style?: {
+            backgroundColor: string;
+            textColor: string;
+        };
+    }>;
     category?: string;
     hasStartedTurn?: boolean;
-    onSpinComplete: () => void;
+    onSpinComplete: (category: string, categoryId: string) => void;
     onStartTurn: () => void;
 }
 
-export function GameStage({ 
-    isCurrentTurn, 
-    category, 
+export function GameStage({
+    isCurrentTurn,
+    categories,
+    category,
     hasStartedTurn = false,
-    onSpinComplete, 
-    onStartTurn 
+    onSpinComplete,
+    onStartTurn
 }: GameStageProps) {
     if (!isCurrentTurn) return null;
 
@@ -26,7 +35,10 @@ export function GameStage({
             {!category ? (
                 <div className="text-center">
                     <h4 className="text-lg font-semibold mb-4">Spin the wheel to get your category!</h4>
-                    <RouletteWheel onSpinComplete={onSpinComplete} />
+                    <RouletteWheel
+                        categories={categories}
+                        onSpinComplete={onSpinComplete}
+                    />
                 </div>
             ) : (
                 <div className="text-center space-y-4">

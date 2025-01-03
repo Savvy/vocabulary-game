@@ -10,7 +10,7 @@ type GameContextType = {
     state: TimeAttackState;
     joinGame: (nickname: string, roomId?: string) => void;
     leaveGame: () => void;
-    spinWheel: () => void;
+    spinWheel: (category: string, categoryId: string) => void;
     submitAnswer: (answer: string) => void;
     startGame: () => void;
 };
@@ -27,7 +27,8 @@ const initialState: TimeAttackState = {
     roundTimeLimit: 30,
     hasStartedTurn: false,
     maxPlayers: 8,
-    inputType: 'multiple-choice'
+    inputType: 'multiple-choice',
+    categories: []
 };
 
 type GameAction =
@@ -64,6 +65,7 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
                 maxPlayers: action.payload.maxPlayers || state.maxPlayers,
                 inputType: action.payload.inputType || state.inputType,
                 roundTimeLimit: action.payload.roundTimeLimit || state.roundTimeLimit,
+                categories: action.payload.categories || state.categories,
             };
         case 'ADD_PLAYER':
             if (state.players.some(p => p.id === action.payload.id)) {
@@ -225,9 +227,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         socket.disconnect();
     }, [socket]);
 
-    const spinWheel = useCallback(() => {
+    const spinWheel = useCallback((category: string, categoryId: string) => {
         if (!socket) return;
-        socket.emit('game:spinWheel');
+        socket.emit('game:spinWheel', { category, categoryId });
     }, [socket]);
 
     const startGame = useCallback(() => {

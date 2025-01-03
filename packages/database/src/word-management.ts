@@ -64,4 +64,29 @@ export async function getAllCategories() {
 
 export async function getAllLanguages() {
     return prisma.language.findMany();
-} 
+}
+
+export async function getRandomCategories(count: number = 6) {
+    return prisma.$queryRaw<Array<{
+        id: string;
+        name: string;
+        backgroundColor: string;
+        textColor: string;
+    }>>`
+        SELECT 
+            id,
+            name,
+            "backgroundColor",
+            "textColor"
+        FROM "Category"
+        ORDER BY RANDOM()
+        LIMIT ${count}
+    `.then(categories => categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        style: {
+            backgroundColor: cat.backgroundColor,
+            textColor: cat.textColor
+        }
+    })));
+}

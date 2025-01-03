@@ -25,12 +25,14 @@ model Word {
 }
 
 model Category {
-    id          String   @id @default(cuid())
-    name        String
-    description String?
-    words       Word[]
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id              String   @id @default(cuid())
+    name            String
+    description     String?
+    backgroundColor String   @default("#FF6B6B")
+    textColor       String   @default("#ffffff")
+    words           Word[]
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
 
     @@unique([name])
 }

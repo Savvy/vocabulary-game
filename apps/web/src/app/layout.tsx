@@ -4,7 +4,6 @@ import './globals.css'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
 import { GameProvider } from '@/contexts/GameContext'
-import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,7 +34,7 @@ export default function RootLayout({
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-500/10 rounded-full blur-3xl" />
-        <Script src="https://unpkg.com/react-scan/dist/auto.global.js"></Script>
+        {/* <Script src="https://unpkg.com/react-scan/dist/auto.global.js"></Script> */}
       </body>
     </html>
   )

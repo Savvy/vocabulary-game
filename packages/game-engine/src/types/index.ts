@@ -19,6 +19,14 @@ export interface GameConfig {
     maxRounds: number;
     scoreSystem: ScoreSystem;
     inputType: 'multiple-choice' | 'single-choice';
+    categories?: Array<{
+        id: string;
+        name: string;
+        style?: {
+            backgroundColor: string;
+            textColor: string;
+        };
+    }>;
 }
 
 export interface ScoreSystem {

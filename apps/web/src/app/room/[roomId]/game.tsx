@@ -91,8 +91,9 @@ export function TimeAttackGame() {
 
                     <GameStage
                         isCurrentTurn={isCurrentTurn}
+                        categories={state.categories || []}
                         category={state.category}
-                        onSpinComplete={() => socket?.emit('game:spinWheel')}
+                        onSpinComplete={(category, categoryId) => socket?.emit('game:spinWheel', { category, categoryId })}
                         onStartTurn={() => socket?.emit('game:startTurn')}
                         hasStartedTurn={state.hasStartedTurn}
                     />

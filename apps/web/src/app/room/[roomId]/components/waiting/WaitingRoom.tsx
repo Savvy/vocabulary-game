@@ -15,11 +15,11 @@ import { GameConfigDialog } from './GameConfigDialog'
 export default function WaitingRoom({ state, isHost, startGame }: {
     host?: Player, state: TimeAttackState, isHost: boolean, startGame: () => void
 }) {
+    console.log('waiting room categories', state.categories)
     return (
         <div className="max-w-2xl mx-auto p-6 space-y-12">
             <WaitingRoomHeader
                 title="Time Attack"
-                // TODO: get max players from backend
                 playerRange={`${state.players.length} / ${state.maxPlayers}`}
                 roomId={state.roomId}
             />
@@ -60,7 +60,8 @@ export default function WaitingRoom({ state, isHost, startGame }: {
                                     maxPlayers: state.maxPlayers,
                                     roundTimeLimit: state.roundTimeLimit,
                                     maxRounds: state.maxRounds,
-                                    inputType: state.inputType
+                                    inputType: state.inputType,
+                                    categories: state.categories
                                 }}
                             />
                         </div>
