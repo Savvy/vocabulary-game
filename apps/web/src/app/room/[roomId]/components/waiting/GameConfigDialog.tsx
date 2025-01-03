@@ -17,12 +17,15 @@ import { Switch } from "@/components/ui/switch"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useSocket } from "@/hooks/useSocket"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface GameConfig {
     maxPlayers: number
     roundTimeLimit: number
     maxRounds: number
     inputType: 'multiple-choice' | 'single-choice'
+    sourceLanguage: string
+    targetLanguage: string
     categories: Array<{
         id: string
         name: string
@@ -39,7 +42,11 @@ interface GameConfigDialogProps {
 
 export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
     const [open, setOpen] = useState<boolean>(false)
-    const [config, setConfig] = useState<GameConfig>(initialConfig)
+    const [config, setConfig] = useState<GameConfig>({
+        ...initialConfig,
+        sourceLanguage: initialConfig.sourceLanguage || 'en',
+        targetLanguage: initialConfig.targetLanguage || 'es'
+    })
     const { socket } = useSocket()
     const { toast } = useToast()
 
@@ -115,6 +122,42 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
                                 inputType: checked ? 'multiple-choice' : 'single-choice'
                             })}
                         />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="sourceLanguage">Source Language</Label>
+                        <Select
+                            value={config.sourceLanguage}
+                            onValueChange={(value) => setConfig({ ...config, sourceLanguage: value })}
+                        >
+                            <SelectTrigger id="sourceLanguage">
+                                <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="it">Italian</SelectItem>
+                                {/* Add more languages as needed */}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="targetLanguage">Target Language</Label>
+                        <Select
+                            value={config.targetLanguage}
+                            onValueChange={(value) => setConfig({ ...config, targetLanguage: value })}
+                        >
+                            <SelectTrigger id="targetLanguage">
+                                <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="it">Italian</SelectItem>
+                                {/* Add more languages as needed */}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
                 <AlertDialogFooter className="flex items-center">

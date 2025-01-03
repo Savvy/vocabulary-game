@@ -8,20 +8,23 @@ datasource db {
 }
 
 model Word {
-    id          String   @id @default(cuid())
-    word        String
-    translation String
-    imageUrl    String
-    category    Category @relation(fields: [categoryId], references: [id])
-    categoryId  String
-    language    Language @relation(fields: [languageId], references: [id])
-    languageId  String
-    options     String[]
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id               String   @id @default(cuid())
+    word             String
+    translation      String
+    imageUrl         String
+    category         Category @relation(fields: [categoryId], references: [id])
+    categoryId       String
+    sourceLanguage   Language @relation("SourceLanguage", fields: [sourceLanguageId], references: [id])
+    sourceLanguageId String
+    targetLanguage   Language @relation("TargetLanguage", fields: [targetLanguageId], references: [id])
+    targetLanguageId String
+    options          String[]
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
 
     @@index([categoryId])
-    @@index([languageId])
+    @@index([sourceLanguageId])
+    @@index([targetLanguageId])
 }
 
 model Category {
@@ -38,10 +41,11 @@ model Category {
 }
 
 model Language {
-    id        String   @id @default(cuid())
-    code      String   @unique // e.g., "en", "es"
-    name      String // e.g., "English", "Spanish"
-    words     Word[]
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id            String   @id @default(cuid())
+    code          String   @unique // e.g., "en", "es"
+    name          String // e.g., "English", "Spanish"
+    wordsAsSource Word[]   @relation("SourceLanguage")
+    wordsAsTarget Word[]   @relation("TargetLanguage")
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 }

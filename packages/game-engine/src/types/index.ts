@@ -19,6 +19,8 @@ export interface GameConfig {
     maxRounds: number;
     scoreSystem: ScoreSystem;
     inputType: 'multiple-choice' | 'single-choice';
+    sourceLanguage: string;
+    targetLanguage: string;
     categories?: Array<{
         id: string;
         name: string;

@@ -37,9 +37,6 @@ export async function getRandomWordsByCategory(
         throw new Error(`Language with code ${languageCode} not found`);
     }
 
-    console.log('Category ID:', categoryId);
-    console.log('Language ID:', language.id);
-
     const words = await prisma.word.findMany({
         where: {
             categoryId,
