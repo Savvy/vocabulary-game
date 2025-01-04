@@ -4,7 +4,6 @@ import { BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import Image from "next/image";
 
 export default function Home() {
   return (
@@ -17,12 +16,12 @@ export default function Home() {
 						<BreadcrumbList>
 							<BreadcrumbItem className="hidden md:block">
 								<BreadcrumbLink href="#">
-									Building Your Application
+									Dashboard
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator className="hidden md:block" />
 							<BreadcrumbItem>
-								<BreadcrumbPage>Data Fetching</BreadcrumbPage>
+								<BreadcrumbPage>Stats</BreadcrumbPage>
 							</BreadcrumbItem>
 						</BreadcrumbList>
 					</Breadcrumb>
