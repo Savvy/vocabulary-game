@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,12 +32,7 @@ export default function RootLayout({
         "dark min-h-screen antialiased relative"
       )}>
         <div className="relative z-10 min-h-screen backdrop-blur-3xl bg-background/50">
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <NextAuthProvider>{children}</NextAuthProvider>
-            </SidebarInset>
-          </SidebarProvider>
+          <NextAuthProvider>{children}</NextAuthProvider>
         </div>
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-3xl" />

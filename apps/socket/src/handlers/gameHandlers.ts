@@ -117,7 +117,7 @@ export function setupGameHandlers(
             translation: w.translation,
             imageUrl: w.imageUrl || '',
             category: w.category.name,
-            language: w.language.code,
+            language: w.sourceLanguage.code,
             options: w.options
         }));
 

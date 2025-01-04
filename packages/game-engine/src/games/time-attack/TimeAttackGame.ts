@@ -26,7 +26,9 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
                     basePoints: 1,
                     timeBonus: false,
                     timeBonusMultiplier: 0
-                }
+                },
+                sourceLanguage: 'en',
+                targetLanguage: 'es'
             },
             {
                 roomId,
