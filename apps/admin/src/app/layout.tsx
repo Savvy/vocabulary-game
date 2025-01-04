@@ -31,7 +31,7 @@ export default function RootLayout({
         geistMono.variable,
         "dark min-h-screen antialiased relative"
       )}>
-        <div className="relative z-10 min-h-screen backdrop-blur-3xl bg-background/50">
+        <div className="relative z-10 max-h-screen overflow-hidden backdrop-blur-3xl bg-background/50">
           <NextAuthProvider>{children}</NextAuthProvider>
         </div>
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-3xl" />
