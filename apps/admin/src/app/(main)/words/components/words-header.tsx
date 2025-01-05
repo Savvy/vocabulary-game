@@ -21,7 +21,7 @@ export function WordsHeader() {
             </div>
             <Button asChild>
                 <Link href="/words/new">
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="h-4 w-4" />
                     Add Word
                 </Link>
             </Button>
