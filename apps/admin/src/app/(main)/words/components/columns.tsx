@@ -23,7 +23,11 @@ type WordWithRelations = Word & {
 }
 
 interface CreateColumnsOptions {
-    onDelete: (word: Word) => void
+    onDelete: (word: Word & {
+        category: { id: string; name: string; backgroundColor: string }
+        sourceLanguage: { id: string; code: string }
+        targetLanguage: { id: string; code: string }
+    }) => void
 }
 
 export function createColumns({ onDelete }: CreateColumnsOptions): ColumnDef<WordWithRelations>[] {

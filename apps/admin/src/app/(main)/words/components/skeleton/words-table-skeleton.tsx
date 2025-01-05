@@ -11,10 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function WordsTableSkeleton() {
     return (
         <div className="space-y-4">
-            <div className="flex items-center gap-4">
-                <Skeleton className="h-10 w-[300px]" />
-                <Skeleton className="h-10 w-[100px] ml-auto" />
-            </div>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
