@@ -27,6 +27,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
 import { Category, Language } from "@vocab/database"
 import { WordImageUpload } from "./word-image-upload"
+import { motion, AnimatePresence } from "framer-motion"
+import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
     word: z.string().min(1, "Word is required"),
@@ -44,6 +46,37 @@ interface WordCreationFormProps {
     languages: Language[]
 }
 
+// Add step validation functions
+function validateStep1(data: z.infer<typeof formSchema>) {
+    return !!(data.word && data.translation && data.sourceLanguageId && data.targetLanguageId)
+}
+
+function validateStep2(data: z.infer<typeof formSchema>) {
+    return !!data.categoryId
+}
+
+function StepIndicator({ isActive, stepNumber }: { isActive: boolean; stepNumber: number }) {
+    return (
+        <div className="h-2 flex-1 mx-1 rounded-full bg-muted overflow-hidden">
+            <AnimatePresence mode="wait">
+                {isActive && (
+                    <motion.div
+                        className="h-full bg-primary"
+                        initial={{ width: 0 }}
+                        animate={{ width: "100%" }}
+                        exit={{ width: 0 }}
+                        transition={{
+                            duration: 0.6,
+                            ease: "easeInOut",
+                            delay: stepNumber * 0.1
+                        }}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
+    )
+}
+
 export function WordCreationForm({ categories, languages }: WordCreationFormProps) {
     const router = useRouter()
     const [step, setStep] = useState(1)
@@ -57,6 +90,7 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
             options: [],
             notes: "",
         },
+        mode: "onBlur"
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -66,7 +100,10 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
             const response = await fetch("/api/words", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(values),
+                body: JSON.stringify({
+                    ...values,
+                    imageUrl: values.imageUrl || "https://placehold.co/600x400.webp",
+                }),
             })
 
             if (!response.ok) throw new Error("Failed to create word")
@@ -89,10 +126,47 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
         }
     }
 
+    // Add function to handle next step
+    function handleNextStep() {
+        const values = form.getValues()
+
+        if (step === 1 && !validateStep1(values)) {
+            form.trigger(['word', 'translation', 'sourceLanguageId', 'targetLanguageId'])
+            return
+        }
+
+        if (step === 2 && !validateStep2(values)) {
+            form.trigger(['categoryId'])
+            return
+        }
+
+        setStep((s) => s + 1)
+    }
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <Card className="p-6">
+                    <h3 className="text-lg font-medium">Create A New Word</h3>
+                    <div className="my-6">
+                        <div className="flex justify-between mb-2">
+                            {[1, 2, 3].map((stepNumber) => (
+                                <StepIndicator
+                                    key={stepNumber}
+                                    isActive={stepNumber <= step}
+                                    stepNumber={stepNumber - 1}
+                                />
+                            ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center">
+                            Step {step} of 3: {
+                                step === 1 ? 'Basic Information' :
+                                    step === 2 ? 'Category & Image' :
+                                        'Options & Notes'
+                            }
+                        </p>
+                    </div>
+
                     {step === 1 && (
                         <div className="space-y-4">
                             <FormField
@@ -286,10 +360,18 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
                         </Button>
                         <Button
                             type={step === 3 ? "submit" : "button"}
-                            onClick={() => step < 3 && setStep((s) => s + 1)}
+                            onClick={() => step < 3 && handleNextStep()}
                             disabled={isSubmitting}
                         >
-                            {step === 3 ? "Create Word" : "Next"}
+                            {step === 3 ? (
+                                isSubmitting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    "Create Word"
+                                )
+                            ) : (
+                                "Next"
+                            )}
                         </Button>
                     </div>
                 </Card>

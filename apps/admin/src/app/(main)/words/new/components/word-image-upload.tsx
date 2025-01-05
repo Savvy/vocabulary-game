@@ -53,7 +53,7 @@ export function WordImageUpload({
     return (
         <div className="space-y-4">
             {value ? (
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                <div className="relative h-96 w-fulloverflow-hidden rounded-lg border">
                     <Image
                         src={value}
                         alt="Word image"
@@ -72,7 +72,7 @@ export function WordImageUpload({
             ) : (
                 <div
                     {...getRootProps()}
-                    className="flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition hover:bg-accent"
+                    className="flex h-96 w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition hover:bg-accent"
                 >
                     <input {...getInputProps()} />
                     {isUploading ? (

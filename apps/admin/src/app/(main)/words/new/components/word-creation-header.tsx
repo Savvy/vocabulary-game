@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
@@ -15,6 +15,7 @@ export function WordCreationHeader() {
                                 Words
                             </BreadcrumbLink>
                         </BreadcrumbItem>
+                        <BreadcrumbSeparator />
                         <BreadcrumbItem>
                             <BreadcrumbPage>New Word</BreadcrumbPage>
                         </BreadcrumbItem>

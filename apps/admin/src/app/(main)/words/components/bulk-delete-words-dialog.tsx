@@ -11,6 +11,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
 interface BulkDeleteWordsDialogProps {
@@ -27,6 +28,7 @@ export function BulkDeleteWordsDialog({
     count,
 }: BulkDeleteWordsDialogProps) {
     const [isDeleting, setIsDeleting] = useState(false)
+    const queryClient = useQueryClient()
     const { toast } = useToast()
 
     async function handleConfirm() {
@@ -37,7 +39,9 @@ export function BulkDeleteWordsDialog({
                 title: "Words deleted",
                 description: `Successfully deleted ${count} words`,
             })
+
             onClose()
+            queryClient.invalidateQueries({ queryKey: ["words"] })
         } catch {
             toast({
                 title: "Error",
@@ -55,7 +59,7 @@ export function BulkDeleteWordsDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will permanently delete {count} selected words and remove them from
+                        This will permanently delete {count} selected word{count > 1 ? "s" : ""} and remove them from
                         all games. This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -66,7 +70,7 @@ export function BulkDeleteWordsDialog({
                         disabled={isDeleting}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                        {isDeleting ? "Deleting..." : `Delete ${count} words`}
+                        {isDeleting ? "Deleting..." : `Delete ${count} word${count > 1 ? "s" : ""}`}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

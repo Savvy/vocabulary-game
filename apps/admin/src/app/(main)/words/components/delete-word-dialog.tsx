@@ -11,6 +11,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 
@@ -28,6 +29,7 @@ export function DeleteWordDialog({
     wordText,
 }: DeleteWordDialogProps) {
     const [isDeleting, setIsDeleting] = useState(false)
+    const queryClient = useQueryClient()
     const { toast } = useToast()
 
     async function handleConfirm() {
@@ -38,6 +40,7 @@ export function DeleteWordDialog({
                 title: "Word deleted",
                 description: `Successfully deleted "${wordText}"`,
             })
+            queryClient.invalidateQueries({ queryKey: ["words"] })
             onClose()
         } catch {
             toast({
