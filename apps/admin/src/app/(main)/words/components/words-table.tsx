@@ -20,6 +20,7 @@ import { WordsTableSkeleton } from "./skeleton/words-table-skeleton"
 import { createColumns } from "./columns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { createQueryParams } from "@/lib/utils"
+import { Category } from "@vocab/database"
 
 interface WordsTableState {
     columnVisibility: VisibilityState
@@ -35,7 +36,7 @@ const initialState: WordsTableState = {
     isBulkDeleteOpen: false
 }
 
-export function WordsTable() {
+export function WordsTable({ categories }: { categories: Category[] }) {
     const router = useRouter()
     const [, startTransition] = useTransition()
     const [state, setState] = useState<WordsTableState>(initialState)
@@ -132,8 +133,13 @@ export function WordsTable() {
 
     // Table configuration
     const columns = useMemo(() => createColumns({
-        onDelete: (word: WordWithRelations) => setState(prev => ({ ...prev, wordToDelete: word }))
-    }), [])
+        onDelete: (word: WordWithRelations) => setState(prev => ({ ...prev, wordToDelete: word })),
+        categories: categories.map((category) => ({
+            id: category.id,
+            name: category.name,
+            backgroundColor: category.backgroundColor,
+        }))
+    }), [categories])
 
     const table = useReactTable({
         data: data?.words || [],
@@ -177,6 +183,7 @@ export function WordsTable() {
         manualPagination: true,
         manualSorting: true,
         manualFiltering: true,
+        enableColumnFilters: true,
     })
 
     return (

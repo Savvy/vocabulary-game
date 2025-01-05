@@ -25,11 +25,18 @@ export async function GET(request: Request) {
         const sortField = searchParams.get('sortField') || undefined
         const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc'
 
+        let validCategoryIds = undefined
+        if (category && category.includes(',')) {
+            validCategoryIds = category.split(',')
+        } else if (category) {
+            validCategoryIds = [category]
+        }
+
         const result = await getWords({
             page,
             pageSize,
             search,
-            categoryIds: category ? [category] : undefined,
+            categoryIds: validCategoryIds,
             sourceLanguageIds: source ? [source] : undefined,
             targetLanguageIds: target ? [target] : undefined,
             sortBy: sortField,
