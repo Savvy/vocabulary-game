@@ -19,6 +19,7 @@ import { BulkDeleteWordsDialog } from "./bulk-delete-words-dialog"
 import { WordsTableSkeleton } from "./skeleton/words-table-skeleton"
 import { createColumns } from "./columns"
 import { Skeleton } from "@/components/ui/skeleton"
+import { createQueryParams } from "@/lib/utils"
 
 interface WordsTableState {
     columnVisibility: VisibilityState
@@ -77,15 +78,15 @@ export function WordsTable() {
     const { data, isLoading } = useQuery({
         queryKey: ['words', { page, pageSize, sortField, sortOrder, search, category, source, target }],
         queryFn: async () => {
-            const params = new URLSearchParams({
+            const params = createQueryParams({
                 page,
                 pageSize,
-                ...(sortField && { sortField }),
-                ...(sortOrder && { sortOrder }),
-                ...(search && { search }),
-                ...(category && { category }),
-                ...(source && { source }),
-                ...(target && { target })
+                sortField,
+                sortOrder,
+                search,
+                category,
+                source,
+                target
             })
 
             const response = await fetch(`/api/words?${params}`)
