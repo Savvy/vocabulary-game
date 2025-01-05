@@ -1,4 +1,4 @@
-import { prisma } from './index';
+import { Prisma, prisma } from './index';
 
 export async function createWord(data: {
     word: string;
@@ -248,4 +248,73 @@ export async function getDashboardChartData() {
             error
         );
     }
+}
+
+export async function getWords(params: {
+    search?: string
+    categoryIds?: string[]
+    sourceLanguageIds?: string[]
+    targetLanguageIds?: string[]
+    page?: number
+    pageSize?: number
+    sortBy?: string
+    sortOrder?: 'asc' | 'desc'
+}) {
+    const {
+        search,
+        categoryIds,
+        sourceLanguageIds,
+        targetLanguageIds,
+        page = 1,
+        pageSize = 10,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+    } = params
+
+    const where: Prisma.WordWhereInput = {
+        AND: [
+            search ? {
+                OR: [
+                    { word: { contains: search, mode: 'insensitive' } },
+                    { translation: { contains: search, mode: 'insensitive' } }
+                ]
+            } : {},
+            categoryIds?.length ? { categoryId: { in: categoryIds } } : {},
+            sourceLanguageIds?.length ? { sourceLanguageId: { in: sourceLanguageIds } } : {},
+            targetLanguageIds?.length ? { targetLanguageId: { in: targetLanguageIds } } : {}
+        ]
+    }
+
+    const [total, words] = await Promise.all([
+        prisma.word.count({ where }),
+        prisma.word.findMany({
+            where,
+            include: {
+                category: true,
+                sourceLanguage: true,
+                targetLanguage: true,
+            },
+            orderBy: { [sortBy]: sortOrder },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        })
+    ])
+
+    return { words, total, pageCount: Math.ceil(total / pageSize) }
+}
+
+export async function deleteWord(wordId: string) {
+    return prisma.word.delete({
+        where: { id: wordId },
+    })
+}
+
+export async function bulkDeleteWords(wordIds: string[]) {
+    return prisma.word.deleteMany({
+        where: {
+            id: {
+                in: wordIds
+            }
+        }
+    })
 }
