@@ -8,7 +8,7 @@ import { GameProvider } from '@/contexts/GameContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Vocabulary Game',
+  title: 'Voqab',
   description: 'Learn vocabulary through interactive gaming',
 }
 

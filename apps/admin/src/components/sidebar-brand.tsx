@@ -15,7 +15,7 @@ export function SidebarBrand() {
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight ml-3">
             <span className="truncate font-semibold">
-              Vocab Master
+              Voqab
             </span>
             <span className="truncate text-xs">Admin</span>
           </div>
