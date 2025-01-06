@@ -25,21 +25,12 @@ export function CategoryCard({ category, onDeleteClick, variants }: CategoryCard
     return (
         <motion.div
             variants={variants}
-           /*  initial={{ y: -40 }}
-            animate={{ y: 0 }}
-            exit={{ y: 40 }} */
-           /*  transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 20,
-                bounce: 0.8,
-            }} */
         >
             <Card className="relative p-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div
-                            className="h-4 w-4 rounded-full"
+                            className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: category.backgroundColor }}
                         />
                         <h3 className="font-semibold">{category.name}</h3>

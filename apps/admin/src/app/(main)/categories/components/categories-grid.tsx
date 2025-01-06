@@ -66,9 +66,7 @@ export function CategoriesGrid() {
 
             if (!response.ok) throw new Error("Failed to delete category")
 
-            queryClient.setQueryData(['categories'], (old: Category[]) =>
-                old.filter(c => c.id !== category.id)
-            )
+            queryClient.invalidateQueries({ queryKey: ['categories'] })
 
             toast({
                 title: "Category deleted",
@@ -102,7 +100,7 @@ export function CategoriesGrid() {
                         variants={container}
                         initial="hidden"
                         animate="show"
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4"
                     >
                         {filteredCategories.map((category: Category) => (
                             <CategoryCard

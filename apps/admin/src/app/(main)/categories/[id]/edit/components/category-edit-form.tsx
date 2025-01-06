@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { Category } from "@vocab/database"
 import { useQueryClient } from "@tanstack/react-query"
 
 const formSchema = z.object({
@@ -28,7 +29,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export function CategoryCreationForm() {
+interface CategoryEditFormProps {
+    category: Category
+}
+
+export function CategoryEditForm({ category }: CategoryEditFormProps) {
     const router = useRouter()
     const queryClient = useQueryClient()
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,9 +41,9 @@ export function CategoryCreationForm() {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            /* description: "", */
-            backgroundColor: "#000000",
+            name: category.name,
+            /* description: category.description ?? "", */
+            backgroundColor: category.backgroundColor,
         },
     })
 
@@ -46,27 +51,30 @@ export function CategoryCreationForm() {
         try {
             setIsSubmitting(true)
 
-            const response = await fetch("/api/categories", {
-                method: "POST",
+            const response = await fetch(`/api/categories`, {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(values),
+                body: JSON.stringify({
+                    id: category.id,
+                    ...values,
+                }),
             })
 
-            if (!response.ok) throw new Error("Failed to create category")
-
-            toast({
-                title: "Category created",
-                description: "The category has been successfully created.",
-            })
+            if (!response.ok) throw new Error("Failed to update category")
 
             queryClient.invalidateQueries({ queryKey: ['categories'] })
+
+            toast({
+                title: "Category updated",
+                description: "The category has been successfully updated.",
+            })
 
             router.push("/categories")
             router.refresh()
         } catch {
             toast({
                 title: "Error",
-                description: "Failed to create category. Please try again.",
+                description: "Failed to update category. Please try again.",
                 variant: "destructive",
             })
         } finally {
@@ -108,7 +116,7 @@ export function CategoryCreationForm() {
                                 </FormItem>
                             )}
                         />
-                       {/*  <FormField
+                        {/* <FormField
                             control={form.control}
                             name="description"
                             render={({ field }) => (
@@ -133,7 +141,7 @@ export function CategoryCreationForm() {
                         {isSubmitting ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                            "Create Category"
+                            "Update Category"
                         )}
                     </Button>
                 </Card>
