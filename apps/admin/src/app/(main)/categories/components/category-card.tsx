@@ -1,10 +1,9 @@
 "use client"
 
-import { Category } from "@vocab/database"
 import { motion, Variants } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { MoreVertical, Pencil, Trash } from "lucide-react"
+import { Book, MoreVertical, Pencil, Trash } from "lucide-react"
 import Link from "next/link"
 import {
     DropdownMenu,
@@ -14,10 +13,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CategoryWithCount } from "./categories-grid"
 
 interface CategoryCardProps {
-    category: Category
-    onDeleteClick: (category: Category) => void
+    category: CategoryWithCount
+    onDeleteClick: (category: CategoryWithCount) => void
     variants?: Variants
 }
 
@@ -45,7 +45,7 @@ export function CategoryCard({ category, onDeleteClick, variants }: CategoryCard
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
                                 <Link href={`/categories/${category.id}/edit`}>
-                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <Pencil className="h-4 w-4" />
                                     Edit
                                 </Link>
                             </DropdownMenuItem>
@@ -54,14 +54,18 @@ export function CategoryCard({ category, onDeleteClick, variants }: CategoryCard
                                 className="text-destructive"
                                 onClick={() => onDeleteClick(category)}
                             >
-                                <Trash className="mr-2 h-4 w-4" />
+                                <Trash className="h-4 w-4" />
                                 Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+                <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Book className="h-4 w-4" />
+                    <span>{category._count.words} words</span>
+                </div>
                 <div
-                    className="absolute inset-0 z-[-10] opacity-15 rounded-md h-16"
+                    className="absolute inset-0 z-[-10] opacity-15 rounded-md h-full w-full"
                     style={{
                         background: `linear-gradient(to right, ${category.backgroundColor}, transparent)`
                     }}

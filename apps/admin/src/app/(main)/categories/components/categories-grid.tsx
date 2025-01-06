@@ -11,6 +11,12 @@ import { CategoryCard } from "./category-card"
 import { AnimatePresence, motion } from "framer-motion"
 import { CategoriesGridSkeleton } from "./skeleton/categories-grid-skeleton"
 
+export interface CategoryWithCount extends Category {
+    _count: {
+        words: number
+    }
+}
+
 const container = {
     hidden: { opacity: 0 },
     show: {
@@ -39,9 +45,9 @@ export function CategoriesGrid() {
     const router = useRouter()
     const queryClient = useQueryClient()
     const [search, setSearch] = useState("")
-    const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+    const [categoryToDelete, setCategoryToDelete] = useState<CategoryWithCount | null>(null)
 
-    const { data: categories = [], isLoading } = useQuery({
+    const { data: categories = [], isLoading } = useQuery<CategoryWithCount[]>({
         queryKey: ['categories'],
         queryFn: async () => {
             const response = await fetch('/api/categories')
@@ -50,15 +56,13 @@ export function CategoriesGrid() {
         }
     })
 
-    if (isLoading) return (
-        <CategoriesGridSkeleton />
-    )
+    if (isLoading) return <CategoriesGridSkeleton />
 
-    const filteredCategories = categories.filter((category: Category) =>
+    const filteredCategories = categories.filter((category) =>
         category.name.toLowerCase().includes(search.toLowerCase())
     )
 
-    const handleDelete = async (category: Category) => {
+    const handleDelete = async (category: CategoryWithCount) => {
         try {
             const response = await fetch(`/api/categories/${category.id}`, {
                 method: "DELETE",
@@ -102,7 +106,7 @@ export function CategoriesGrid() {
                         animate="show"
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4"
                     >
-                        {filteredCategories.map((category: Category) => (
+                        {filteredCategories.map((category) => (
                             <CategoryCard
                                 key={category.id}
                                 category={category}
