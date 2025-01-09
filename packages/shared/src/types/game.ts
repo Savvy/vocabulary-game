@@ -47,13 +47,21 @@ export type ServerToClientEvents = {
 
 export interface GameConfig {
     maxPlayers: number;
+    minPlayers: number;
     roundTimeLimit: number;
     maxRounds: number;
     inputType: 'multiple-choice' | 'single-choice';
+    sourceLanguage: string;
+    targetLanguage: string;
 }
 
 export type ClientToServerEvents = {
-    'game:join': (payload: { nickname: string; roomId?: string }) => void;
+    'game:join': (payload: { 
+        nickname: string; 
+        roomId?: string;
+        sourceLanguage: string;
+        targetLanguage: string;
+    }) => void;
     'game:leave': () => void;
     'game:spinWheel': (payload: { category: string; categoryId: string }) => void;
     'game:answer': (answer: string) => void;

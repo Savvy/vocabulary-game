@@ -7,47 +7,68 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Word {
-    id               String   @id @default(cuid())
-    word             String
-    translation      String
-    imageUrl         String
-    category         Category @relation(fields: [categoryId], references: [id])
-    categoryId       String
-    sourceLanguage   Language @relation("SourceLanguage", fields: [sourceLanguageId], references: [id])
-    sourceLanguageId String
-    targetLanguage   Language @relation("TargetLanguage", fields: [targetLanguageId], references: [id])
-    targetLanguageId String
-    options          String[]
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
-
-    @@index([createdAt])
-    @@index([categoryId])
-    @@index([sourceLanguageId, targetLanguageId])
+model Language {
+    id                   String                @id @default(cuid())
+    code                 String                @unique
+    name                 String
+    wordTranslations     WordTranslation[]
+    categoryTranslations CategoryTranslation[]
+    createdAt            DateTime              @default(now())
+    updatedAt            DateTime              @updatedAt
 }
 
 model Category {
-    id              String   @id @default(cuid())
-    name            String
-    description     String?
-    backgroundColor String   @default("#FF6B6B")
-    textColor       String   @default("#ffffff")
+    id              String                @id @default(cuid())
+    categoryCode    String                @unique
+    backgroundColor String                @default("#FF6B6B")
+    textColor       String                @default("#ffffff")
+    translations    CategoryTranslation[]
     words           Word[]
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
-
-    @@unique([name])
+    createdAt       DateTime              @default(now())
+    updatedAt       DateTime              @updatedAt
 }
 
-model Language {
-    id            String   @id @default(cuid())
-    code          String   @unique // e.g., "en", "es"
-    name          String // e.g., "English", "Spanish"
-    wordsAsSource Word[]   @relation("SourceLanguage")
-    wordsAsTarget Word[]   @relation("TargetLanguage")
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+model CategoryTranslation {
+    id          String   @id @default(cuid())
+    categoryId  String
+    languageId  String
+    translation String
+    category    Category @relation(fields: [categoryId], references: [id])
+    language    Language @relation(fields: [languageId], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([categoryId, languageId])
+    @@index([categoryId])
+    @@index([languageId])
+}
+
+model Word {
+    id           String            @id @default(cuid())
+    categoryId   String
+    imageUrl     String
+    translations WordTranslation[]
+    category     Category          @relation(fields: [categoryId], references: [id])
+    createdAt    DateTime          @default(now())
+    updatedAt    DateTime          @updatedAt
+
+    @@index([categoryId])
+}
+
+model WordTranslation {
+    id          String   @id @default(cuid())
+    options     String[]
+    wordId      String
+    languageId  String
+    translation String
+    language    Language @relation(fields: [languageId], references: [id])
+    word        Word     @relation(fields: [wordId], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([wordId, languageId])
+    @@index([wordId])
+    @@index([languageId])
 }
 
 model AdminUser {

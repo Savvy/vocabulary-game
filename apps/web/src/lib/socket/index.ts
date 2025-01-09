@@ -10,7 +10,8 @@ export const initializeSocket = () => {
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
-            timeout: 10000
+            timeout: 10000,
+            transports: ['websocket']
         });
 
         socket.on('connect', () => {

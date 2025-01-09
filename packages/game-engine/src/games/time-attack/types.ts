@@ -21,6 +21,8 @@ export interface TimeAttackState extends BaseGameState {
         correct: number;
         total: number;
     }>;
+    sourceLanguage: string;
+    targetLanguage: string;
 }
 
 export interface TimeAttackAction {

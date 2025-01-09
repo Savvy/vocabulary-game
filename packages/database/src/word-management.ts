@@ -1,62 +1,80 @@
 import { Prisma, prisma } from "./index";
 
 export async function createWord(data: {
-	word: string;
-	translation: string;
-	imageUrl: string;
+	translations: Array<{
+		languageId: string;
+		translation: string;
+		options: string[];
+	}>;
 	categoryId: string;
-	sourceLanguageId: string;
-	targetLanguageId: string;
-	options: string[];
+	imageUrl: string;
 }) {
 	return prisma.word.create({
 		data: {
-			word: data.word,
-			translation: data.translation,
+			categoryId: data.categoryId,
 			imageUrl: data.imageUrl,
-			options: data.options,
-			category: { connect: { id: data.categoryId } },
-			sourceLanguage: { connect: { id: data.sourceLanguageId } },
-			targetLanguage: { connect: { id: data.targetLanguageId } },
+			translations: {
+				create: data.translations
+			}
 		},
 		include: {
-			category: true,
-			sourceLanguage: true,
-			targetLanguage: true,
-		},
+			category: {
+				include: {
+					translations: true
+				}
+			},
+			translations: {
+				include: {
+					language: true
+				}
+			}
+		}
 	});
 }
 
 export async function getRandomWordsByCategory(
 	categoryId: string,
-	languageCode: string,
+	sourceLanguageCode: string,
+	targetLanguageCode: string,
 	count: number
 ) {
-	const language = await prisma.language.findUnique({
-		where: { code: languageCode },
-	});
-
-	if (!language) {
-		throw new Error(`Language with code ${languageCode} not found`);
-	}
-
-	const words = await prisma.word.findMany({
-		where: {
-			categoryId,
-			sourceLanguageId: language.id,
-		},
-		take: count,
-		orderBy: {
-			id: "asc",
-		},
-		include: {
-			category: true,
-			sourceLanguage: true,
-			targetLanguage: true,
-		},
-	});
-
-	return words.length > 0 ? words.sort(() => Math.random() - 0.5) : words;
+	return prisma.$queryRaw<Array<{
+		id: string;
+		imageUrl: string;
+		categoryId: string;
+		translations: Array<{
+			translation: string;
+			languageId: string;
+			options: string[];
+		}>;
+	}>>`
+		WITH RandomWords AS (
+			SELECT DISTINCT w.id, w."imageUrl", w."categoryId", random() as rand
+			FROM "Word" w
+			JOIN "WordTranslation" wt ON w.id = wt."wordId"
+			JOIN "Language" l ON wt."languageId" = l.id
+			WHERE w."categoryId" = ${categoryId}
+			AND l.code IN (${sourceLanguageCode}, ${targetLanguageCode})
+			ORDER BY rand
+			LIMIT ${count}
+		)
+		SELECT 
+			w.id,
+			w."imageUrl",
+			w."categoryId",
+			json_agg(
+				json_build_object(
+					'translation', wt.translation,
+					'languageId', l.code,
+					'options', wt.options
+				)
+			) as translations
+		FROM RandomWords w
+		JOIN "WordTranslation" wt ON w.id = wt."wordId"
+		JOIN "Language" l ON wt."languageId" = l.id
+		WHERE l.code IN (${sourceLanguageCode}, ${targetLanguageCode})
+		GROUP BY w.id, w."imageUrl", w."categoryId"
+	`;
 }
 
 export async function getAllCategories() {
@@ -67,27 +85,46 @@ export async function getAllLanguages() {
 	return prisma.language.findMany();
 }
 
-export async function getRandomCategories(count: number = 6) {
+export async function getRandomCategories(
+	count: number = 6,
+	sourceLanguage?: string,
+	targetLanguage?: string
+) {
 	return prisma.$queryRaw<
 		Array<{
 			id: string;
 			name: string;
+			sourceName: string | null;
+			targetName: string | null;
 			backgroundColor: string;
 			textColor: string;
 		}>
 	>`
-        SELECT 
-            id,
-            name,
-            "backgroundColor",
-            "textColor"
-        FROM "Category"
-        ORDER BY RANDOM()
-        LIMIT ${count}
-    `.then((categories) =>
+		SELECT 
+			c.id,
+			c."categoryCode" as name,
+			ct_source.translation as "sourceName",
+			ct_target.translation as "targetName",
+			c."backgroundColor",
+			c."textColor"
+			FROM "Category" c
+			LEFT JOIN "CategoryTranslation" ct_source 
+				ON c.id = ct_source."categoryId" 
+				AND ct_source."languageId" = (
+					SELECT id FROM "Language" WHERE code = ${sourceLanguage}
+				)
+			LEFT JOIN "CategoryTranslation" ct_target
+				ON c.id = ct_target."categoryId"
+				AND ct_target."languageId" = (
+					SELECT id FROM "Language" WHERE code = ${targetLanguage}
+				)
+			ORDER BY RANDOM()
+			LIMIT ${count}
+	`.then((categories) =>
 		categories.map((cat) => ({
 			id: cat.id,
-			name: cat.name,
+			name: cat.sourceName || cat.name,
+			translation: cat.targetName || cat.name,
 			style: {
 				backgroundColor: cat.backgroundColor,
 				textColor: cat.textColor,
@@ -259,8 +296,7 @@ export async function getDashboardChartData() {
 export async function getWords(params: {
 	search?: string;
 	categoryIds?: string[];
-	sourceLanguageIds?: string[];
-	targetLanguageIds?: string[];
+	languageId?: string;
 	page?: number;
 	pageSize?: number;
 	sortBy?: string;
@@ -269,46 +305,43 @@ export async function getWords(params: {
 	const {
 		search,
 		categoryIds,
-		sourceLanguageIds,
-		targetLanguageIds,
+		languageId,
 		page = 1,
 		pageSize = 10,
 		sortBy = "createdAt",
 		sortOrder = "desc",
 	} = params;
 
-	const whereConditions = [];
+	const whereConditions: Prisma.WordWhereInput[] = [];
 
 	if (search) {
 		whereConditions.push({
-			OR: [
-				{ word: { contains: search, mode: "insensitive" } },
-				{ translation: { contains: search, mode: "insensitive" } },
-			],
+			translations: {
+				some: {
+					translation: {
+						contains: search,
+						mode: "insensitive"
+					}
+				}
+			}
 		});
 	}
 
 	if (categoryIds?.length) {
 		whereConditions.push({
-			OR: categoryIds.map((id) => ({
-				categoryId: id,
-			})),
+			categoryId: {
+				in: categoryIds
+			}
 		});
 	}
 
-	if (sourceLanguageIds?.length) {
+	if (languageId) {
 		whereConditions.push({
-			OR: sourceLanguageIds.map((id) => ({
-				sourceLanguageId: id,
-			})),
-		});
-	}
-
-	if (targetLanguageIds?.length) {
-		whereConditions.push({
-			OR: targetLanguageIds.map((id) => ({
-				targetLanguageId: id,
-			})),
+			translations: {
+				some: {
+					languageId
+				}
+			}
 		});
 	}
 
@@ -321,9 +354,16 @@ export async function getWords(params: {
 		prisma.word.findMany({
 			where,
 			include: {
-				category: true,
-				sourceLanguage: true,
-				targetLanguage: true,
+				category: {
+					include: {
+						translations: true
+					}
+				},
+				translations: {
+					include: {
+						language: true
+					}
+				}
 			},
 			orderBy: { [sortBy]: sortOrder },
 			skip: (page - 1) * pageSize,
@@ -331,21 +371,81 @@ export async function getWords(params: {
 		}),
 	]);
 
-	return { words, total, pageCount: Math.ceil(total / pageSize) };
+	return { 
+		words, 
+		total, 
+		pageCount: Math.ceil(total / pageSize) 
+	};
 }
 
 export async function deleteWord(wordId: string) {
+	// First delete all translations
+	await prisma.wordTranslation.deleteMany({
+		where: { wordId }
+	});
+
+	// Then delete the word
 	return prisma.word.delete({
-		where: { id: wordId },
+		where: { id: wordId }
 	});
 }
 
 export async function bulkDeleteWords(wordIds: string[]) {
+	// First delete all translations for these words
+	await prisma.wordTranslation.deleteMany({
+		where: {
+			wordId: {
+				in: wordIds
+			}
+		}
+	});
+
+	// Then delete the words
 	return prisma.word.deleteMany({
 		where: {
 			id: {
-				in: wordIds,
-			},
+				in: wordIds
+			}
+		}
+	});
+}
+
+export async function getWordsByLanguagePair(
+	sourceLangId: string,
+	targetLangId: string,
+	categoryId?: string
+) {
+	return prisma.word.findMany({
+		where: {
+			categoryId: categoryId,
+			translations: {
+				some: {
+					languageId: {
+						in: [sourceLangId, targetLangId]
+					}
+				}
+			}
 		},
+		include: {
+			translations: {
+				where: {
+					languageId: {
+						in: [sourceLangId, targetLangId]
+					}
+				},
+				include: {
+					language: true
+				}
+			},
+			category: {
+				include: {
+					translations: {
+						where: {
+							languageId: sourceLangId
+						}
+					}
+				}
+			}
+		}
 	});
 }

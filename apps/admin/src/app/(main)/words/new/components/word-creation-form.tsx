@@ -31,13 +31,13 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
-    word: z.string().min(1, "Word is required"),
-    translation: z.string().min(1, "Translation is required"),
+    translations: z.array(z.object({
+        languageId: z.string().min(1),
+        translation: z.string().min(1),
+        options: z.array(z.string()).min(3)
+    })).min(2),
     categoryId: z.string().min(1, "Category is required"),
-    sourceLanguageId: z.string().min(1, "Source language is required"),
-    targetLanguageId: z.string().min(1, "Target language is required"),
     imageUrl: z.string().optional(),
-    options: z.array(z.string()).min(3, "At least 3 options are required"),
     notes: z.string().optional(),
 })
 
@@ -48,7 +48,7 @@ interface WordCreationFormProps {
 
 // Add step validation functions
 function validateStep1(data: z.infer<typeof formSchema>) {
-    return !!(data.word && data.translation && data.sourceLanguageId && data.targetLanguageId)
+    return !!(data.translations.length >= 2)
 }
 
 function validateStep2(data: z.infer<typeof formSchema>) {
@@ -85,9 +85,9 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            word: "",
-            translation: "",
-            options: [],
+            translations: [],
+            categoryId: "",
+            imageUrl: "",
             notes: "",
         },
         mode: "onBlur"
@@ -131,7 +131,7 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
         const values = form.getValues()
 
         if (step === 1 && !validateStep1(values)) {
-            form.trigger(['word', 'translation', 'sourceLanguageId', 'targetLanguageId'])
+            form.trigger(['translations'])
             return
         }
 
@@ -291,7 +291,7 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
                                             <SelectContent>
                                                 {categories.map((category) => (
                                                     <SelectItem key={category.id} value={category.id}>
-                                                        {category.name}
+                                                        {category.categoryCode}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

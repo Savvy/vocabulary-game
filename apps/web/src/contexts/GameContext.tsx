@@ -209,7 +209,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         
         const handleConnect = () => {
             console.log('[Socket] Joining game', nickname, roomId);
-            socket.emit('game:join', { nickname, roomId });
+            const sourceLanguage = 'en';
+            const targetLanguage = 'es';
+            socket.emit('game:join', { nickname, roomId, sourceLanguage, targetLanguage });
             saveSession(nickname, roomId || '');
         };
 

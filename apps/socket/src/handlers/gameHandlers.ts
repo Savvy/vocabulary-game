@@ -14,7 +14,7 @@ export function setupGameHandlers(
     socket: Socket<ClientToServerEvents, ServerToClientEvents>,
     games: Map<string, TimeAttackGame>
 ) {
-    socket.on('game:join', async ({ nickname, roomId }) => {
+    socket.on('game:join', async ({ nickname, roomId, sourceLanguage, targetLanguage }) => {
         const targetRoomId = roomId || uuidv4();
         let game = games.get(targetRoomId);
 
@@ -23,8 +23,13 @@ export function setupGameHandlers(
                 socket.emit('game:error', 'Game not found');
                 return;
             }
-            const categories = await getRandomCategories();
-            game = new TimeAttackGame(targetRoomId, categories);
+            const categories = await getRandomCategories(6, sourceLanguage, targetLanguage);
+            game = new TimeAttackGame({
+                roomId: targetRoomId,
+                sourceLanguage,
+                targetLanguage,
+                categories
+            });
             game.onStateChange = (state) => {
                 io.to(targetRoomId).emit('game:state', state);
             };
@@ -45,33 +50,6 @@ export function setupGameHandlers(
         io.to(targetRoomId).emit('game:playerJoined', player);
         socket.emit('game:state', game.getState());
     });
-
-   /*  socket.on('game:join', async ({ nickname, roomId }) => {
-        let game: TimeAttackGame;
-
-        if (roomId && games.has(roomId)) {
-            game = games.get(roomId)!;
-        } else {
-            const newRoomId = roomId || uuidv4();
-            game = new TimeAttackGame(newRoomId);
-            const categories = await getRandomCategories();
-            game.updateConfig({ categories }); // Add categories to game state
-            games.set(newRoomId, game);
-        }
-
-        const player = {
-            id: socket.id,
-            nickname,
-            score: 0,
-            roomId: game.getState().roomId,
-            isHost: game.getState().players.length === 0
-        };
-
-        game.addPlayer(player);
-        socket.join(game.getState().roomId);
-        io.to(game.getState().roomId).emit('game:playerJoined', player);
-        socket.emit('game:state', game.getState());
-    }); */
 
     socket.on('game:spinWheel', async ({ category, categoryId }) => {
         console.log('Received game:spinWheel event');
@@ -109,17 +87,44 @@ export function setupGameHandlers(
 
         const { category, categoryId } = game.getState();
         if (!category || !categoryId) return;
+        const { sourceLanguage, targetLanguage } = game.getState();
+        const dbWords = await getRandomWordsByCategory(categoryId, sourceLanguage, targetLanguage, 5);
+        console.log("dbWords", dbWords)
+        const words = dbWords.map(w => {
+            const sourceTranslation = w.translations.find(t =>
+                t.languageId === sourceLanguage
+            );
 
-        const dbWords = await getRandomWordsByCategory(categoryId, "en", 5);
-        const words = dbWords.map(w => ({
-            id: w.id,
-            word: w.word,
-            translation: w.translation,
-            imageUrl: w.imageUrl || '',
-            category: w.category.name,
-            language: w.sourceLanguage.code,
-            options: w.options
-        }));
+            const targetTranslation = w.translations.find(t =>
+                t.languageId === targetLanguage
+            );
+
+            console.log("sourceTranslation", sourceTranslation)
+            console.log("targetTranslation", targetTranslation)
+
+            if (!sourceTranslation) {
+                console.log("sourceTranslation not found")
+            }
+
+            if (!targetTranslation) {
+                console.log("targetTranslation not found")
+            }
+
+            if (!sourceTranslation || !targetTranslation) {
+
+                throw new Error(`Missing translations for word ${w.id}`);
+            }
+
+            return {
+                id: w.id,
+                word: sourceTranslation.translation,
+                translation: targetTranslation.translation,
+                imageUrl: w.imageUrl || '',
+                category: w.categoryId,
+                language: sourceTranslation.languageId,
+                options: sourceTranslation.options
+            };
+        });
 
         game.setWordQueue(words);
         console.log('[Socket] Set word queue', words);
