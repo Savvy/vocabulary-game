@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { Medal, Crown } from 'lucide-react';
 
 interface PlayerResultProps {
@@ -21,15 +22,17 @@ export function PlayerResult({ nickname, wordsCorrect, totalWords, rank, isWinne
         : '0';
 
     return (
-        <div className={`relative rounded-xl p-4 border transition-all
-      ${isWinner
-                ? 'bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-amber-500/20'
-                : 'bg-[#1a2333] border-indigo-500/20'}`}
-        >
+        <div className={cn(
+            "relative rounded-xl p-4 border transition-all",
+            { 'bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-amber-500/20': isWinner },
+            { 'bg-[#1a2333] border-indigo-500/20': !isWinner }
+        )}>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#1a2333] border border-indigo-500/20 
-                       flex items-center justify-center">
+                    <div className={cn(
+                        "w-12 h-12 rounded-xl bg-[#1a2333] border border-indigo-500/20",
+                        "flex items-center justify-center"
+                    )}>
                         {getRankIcon() || <span className="text-indigo-400 font-bold">#{rank}</span>}
                     </div>
                     <div>
@@ -44,11 +47,10 @@ export function PlayerResult({ nickname, wordsCorrect, totalWords, rank, isWinne
                         <p className="text-indigo-300/80 text-sm">{wordsCorrect} / {totalWords} words</p>
                     </div>
                 </div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-white to-indigo-200 
-                     bg-clip-text text-transparent">
+                <div className="text-3xl font-bold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
                     {accuracy}%
                 </div>
             </div>
-        </div>
+        </ div>
     );
 }

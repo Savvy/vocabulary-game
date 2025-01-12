@@ -5,7 +5,7 @@ import { ArrowRight, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { GameStats } from './GameStats';
 import { PlayerResult } from './PlayerResult';
 import { useGame } from '@/contexts/GameContext';
@@ -19,25 +19,20 @@ interface GameEndViewProps {
     gameEndedAt?: number;
 }
 
+// Calculate game duration
+const formatDuration = (startTime?: number, endTime?: number) => {
+    if (!startTime || !endTime) return "00:00";
+    const durationInSeconds = Math.floor((endTime - startTime) / 1000);
+    const minutes = Math.floor(durationInSeconds / 60);
+    const seconds = durationInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
 export function GameEndView({ players, wordsAnswered, rounds, gameStartedAt, gameEndedAt }: GameEndViewProps) {
     const router = useRouter();
     const { resetGame } = useGame();
 
-    // Calculate game duration
-    const formatDuration = (startTime?: number, endTime?: number) => {
-        console.log('startTime', startTime);
-        console.log('endTime', endTime);
-        if (!startTime || !endTime) return "00:00";
-        const durationInSeconds = Math.floor((endTime - startTime) / 1000);
-        const minutes = Math.floor(durationInSeconds / 60);
-        const seconds = durationInSeconds % 60;
-        console.log('durationInSeconds', durationInSeconds);
-        console.log('minutes', minutes);
-        console.log('seconds', seconds); 
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    };
-
-    const gameDuration = formatDuration(gameStartedAt, gameEndedAt);
+    const gameDuration = useMemo(() => formatDuration(gameStartedAt, gameEndedAt), [gameStartedAt, gameEndedAt]);
 
     // Sort players by score
     // const sortedPlayers = [...players].sort((a, b) => scores[b.id] - scores[a.id]);
@@ -55,12 +50,6 @@ export function GameEndView({ players, wordsAnswered, rounds, gameStartedAt, gam
 
         return scoreB - scoreA;
     });
-
-    /* 
-    
-    
-    
-    */
 
     useEffect(() => {
         // Trigger confetti for winner celebration
