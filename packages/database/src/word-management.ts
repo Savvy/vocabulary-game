@@ -4,7 +4,6 @@ export async function createWord(data: {
 	translations: Array<{
 		languageId: string;
 		translation: string;
-		options: string[];
 	}>;
 	categoryId: string;
 	imageUrl: string;
@@ -45,16 +44,15 @@ export async function getRandomWordsByCategory(
 		translations: Array<{
 			translation: string;
 			languageId: string;
-			options: string[];
 		}>;
 	}>>`
 		WITH RandomWords AS (
 			SELECT DISTINCT w.id, w."imageUrl", w."categoryId", random() as rand
 			FROM "Word" w
-			JOIN "WordTranslation" wt ON w.id = wt."wordId"
-			JOIN "Language" l ON wt."languageId" = l.id
+				JOIN "WordTranslation" wt ON w.id = wt."wordId"
+				JOIN "Language" l ON wt."languageId" = l.id
 			WHERE w."categoryId" = ${categoryId}
-			AND l.code IN (${sourceLanguageCode}, ${targetLanguageCode})
+				AND l.code IN (${sourceLanguageCode}, ${targetLanguageCode})
 			ORDER BY rand
 			LIMIT ${count}
 		)
@@ -65,13 +63,12 @@ export async function getRandomWordsByCategory(
 			json_agg(
 				json_build_object(
 					'translation', wt.translation,
-					'languageId', l.code,
-					'options', wt.options
+					'languageId', l.code
 				)
 			) as translations
 		FROM RandomWords w
-		JOIN "WordTranslation" wt ON w.id = wt."wordId"
-		JOIN "Language" l ON wt."languageId" = l.id
+			JOIN "WordTranslation" wt ON w.id = wt."wordId"
+			JOIN "Language" l ON wt."languageId" = l.id
 		WHERE l.code IN (${sourceLanguageCode}, ${targetLanguageCode})
 		GROUP BY w.id, w."imageUrl", w."categoryId"
 	`;

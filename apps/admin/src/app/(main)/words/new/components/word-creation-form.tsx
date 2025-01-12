@@ -34,7 +34,6 @@ const formSchema = z.object({
     translations: z.array(z.object({
         languageId: z.string().min(1),
         translation: z.string().min(1),
-        options: z.array(z.string()).min(3)
     })).min(2),
     categoryId: z.string().min(1, "Category is required"),
     imageUrl: z.string().optional(),

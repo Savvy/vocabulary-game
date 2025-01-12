@@ -9,7 +9,6 @@ const wordSchema = z.object({
     sourceLanguageId: z.string().min(1),
     targetLanguageId: z.string().min(1),
     imageUrl: z.string(),
-    options: z.array(z.string()).min(3),
     /* notes: z.string().optional(), */
 })
 
@@ -66,7 +65,6 @@ export async function POST(request: Request) {
                 sourceLanguageId: body.sourceLanguageId,
                 targetLanguageId: body.targetLanguageId,
                 imageUrl: body.imageUrl,
-                options: body.options,
                 /* notes: body.notes, */
             },
             include: {

@@ -89,7 +89,7 @@ export function setupGameHandlers(
         const { sourceLanguage, targetLanguage } = game.getState();
         const dbWords = await getRandomWordsByCategory(categoryId, sourceLanguage, targetLanguage, 6);
         console.log("dbWords", dbWords)
-        const words = dbWords.map(w => {
+        const words = dbWords.map((w, index) => {
             const sourceTranslation = w.translations.find(t =>
                 t.languageId === sourceLanguage
             );
@@ -98,21 +98,19 @@ export function setupGameHandlers(
                 t.languageId === targetLanguage
             );
 
-            console.log("sourceTranslation", sourceTranslation)
-            console.log("targetTranslation", targetTranslation)
-
-            if (!sourceTranslation) {
-                console.log("sourceTranslation not found")
-            }
-
-            if (!targetTranslation) {
-                console.log("targetTranslation not found")
-            }
-
             if (!sourceTranslation || !targetTranslation) {
-
                 throw new Error(`Missing translations for word ${w.id}`);
             }
+
+            // Get 3 random incorrect options from other words
+            const otherWords = dbWords.filter((_, i) => i !== index);
+            const incorrectOptions = otherWords
+                .map(other => other.translations.find(t => t.languageId === targetLanguage)?.translation)
+                .filter((translation): translation is string => !!translation)
+                .slice(0, 3);
+
+            // Combine correct answer with incorrect options
+            const options = [targetTranslation.translation, ...incorrectOptions];
 
             return {
                 id: w.id,
@@ -121,7 +119,7 @@ export function setupGameHandlers(
                 imageUrl: w.imageUrl || '',
                 category: w.categoryId,
                 language: sourceTranslation.languageId,
-                options: sourceTranslation.options
+                options: options
             };
         });
 
