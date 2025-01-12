@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import {
     ClientToServerEvents,
     ServerToClientEvents
@@ -15,7 +15,7 @@ export function setupGameHandlers(
     games: Map<string, TimeAttackGame>
 ) {
     socket.on('game:join', async ({ nickname, roomId, sourceLanguage, targetLanguage }) => {
-        const targetRoomId = roomId || uuidv4();
+        const targetRoomId = roomId || nanoid(8);
         let game = games.get(targetRoomId);
 
         if (!game) {
