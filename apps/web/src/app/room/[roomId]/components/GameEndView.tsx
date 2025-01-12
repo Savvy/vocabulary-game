@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
 import { GameStats } from './GameStats';
 import { PlayerResult } from './PlayerResult';
+import { useGame } from '@/contexts/GameContext';
 
 interface GameEndViewProps {
     players: Player[];
@@ -18,6 +19,7 @@ interface GameEndViewProps {
 
 export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps) {
     const router = useRouter();
+    const { resetGame } = useGame();
 
     // Sort players by score
     // const sortedPlayers = [...players].sort((a, b) => scores[b.id] - scores[a.id]);
@@ -60,6 +62,11 @@ export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps
         }
     }; */
 
+    const handlePlayAgain = () => {
+        resetGame();
+        router.push('/');
+    };
+
     return (
         <div className="max-w-2xl mx-auto p-6 relative">
             <div className="text-center mb-12">
@@ -92,24 +99,9 @@ export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps
                 totalTime="5:32"
                 rounds={rounds}
             />
-
-            {/* <button
-                onClick={onPlayAgain}
-                className="w-full group relative py-3 px-6 rounded-xl bg-indigo-500 
-                   hover:bg-indigo-400 text-white font-medium transition-all 
-                   overflow-hidden mt-8"
-            >
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 
-                       to-violet-400/20 opacity-0 group-hover:opacity-100 
-                       transition-opacity" />
-                <span className="relative flex items-center justify-center gap-2">
-                    Play Again
-                    <ArrowRight className="w-5 h-5" />
-                </span>
-            </button> */}
             <Button
                 size="lg"
-                onClick={() => router.push('/')}
+                onClick={handlePlayAgain}
                 className="mt-8 w-full py-3 px-6 font-bold group"
             >
                 Play Again

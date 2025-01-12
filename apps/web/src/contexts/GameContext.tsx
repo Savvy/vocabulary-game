@@ -13,6 +13,7 @@ type GameContextType = {
     spinWheel: (category: string, categoryId: string) => void;
     submitAnswer: (answer: string) => void;
     startGame: () => void;
+    resetGame: () => void;
 };
 
 const initialState: TimeAttackState = {
@@ -38,7 +39,8 @@ type GameAction =
     | { type: 'SET_WORD'; payload: Word }
     | { type: 'SET_CATEGORY'; payload: string }
     | { type: 'UPDATE_SCORES'; payload: Record<string, number> }
-    | { type: 'SET_ROOM_ID'; payload: string };
+    | { type: 'SET_ROOM_ID'; payload: string }
+    | { type: 'RESET_STATE'; payload: TimeAttackState };
 
 function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackState {
     switch (action.type) {
@@ -100,6 +102,8 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
                 ...state,
                 roomId: action.payload,
             };
+        case 'RESET_STATE':
+            return action.payload;
         default:
             return state;
     }
@@ -248,6 +252,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         socket.emit('game:answer', answer);
     }, [socket]);
 
+    const resetGame = useCallback(() => {
+        if (!socket) return;
+        socket.disconnect();
+        dispatch({ type: 'RESET_STATE', payload: initialState });
+        clearSession();
+    }, [socket, clearSession]);
+
     useEffect(() => {
         if (state.status === 'finished') {
             clearSession();
@@ -262,7 +273,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
                 leaveGame,
                 spinWheel,
                 submitAnswer,
-                startGame
+                startGame,
+                resetGame
             }}
         >
             {children}
