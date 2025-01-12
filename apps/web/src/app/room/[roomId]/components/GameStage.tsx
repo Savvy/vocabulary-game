@@ -9,6 +9,7 @@ interface GameStageProps {
     categories: Array<{
         id: string;
         name: string;
+        translation: string;
         style?: {
             backgroundColor: string;
             textColor: string;
@@ -30,6 +31,9 @@ export function GameStage({
 }: GameStageProps) {
     if (!isCurrentTurn) return null;
 
+    console.log('[GameStage] category', category);
+    console.log('[GameStage] categories', categories);
+
     return (
         <Card className="w-full p-6">
             {!category ? (
@@ -43,7 +47,7 @@ export function GameStage({
             ) : (
                 <div className="text-center space-y-4">
                     <h4 className="text-lg font-semibold">
-                        Category: {category}
+                        {category}
                     </h4>
                     {!hasStartedTurn && (
                         <Button onClick={onStartTurn}>

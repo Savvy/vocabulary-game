@@ -93,5 +93,6 @@ export interface TimeAttackState extends BaseGameState {
             backgroundColor: string;
             textColor: string;
         };
+        translation: string;
     }>;
 }

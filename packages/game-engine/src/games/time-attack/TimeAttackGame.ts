@@ -258,6 +258,17 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.wordQueue = words;
     }
 
+    setCategories(categories: Array<{
+        id: string;
+        name: string;
+        style?: {
+            backgroundColor: string;
+            textColor: string;
+        };
+    }>): void {
+        this.state.categories = categories;
+    }
+
     updateConfig(config: Partial<GameConfig>): void {
         if (this.state.status !== 'waiting') {
             throw new Error('Cannot update config after game has started');

@@ -23,12 +23,11 @@ export function setupGameHandlers(
                 socket.emit('game:error', 'Game not found');
                 return;
             }
-            const categories = await getRandomCategories(6, sourceLanguage, targetLanguage);
             game = new TimeAttackGame({
                 roomId: targetRoomId,
                 sourceLanguage,
                 targetLanguage,
-                categories
+                categories: []
             });
             game.onStateChange = (state) => {
                 io.to(targetRoomId).emit('game:state', state);
@@ -88,7 +87,7 @@ export function setupGameHandlers(
         const { category, categoryId } = game.getState();
         if (!category || !categoryId) return;
         const { sourceLanguage, targetLanguage } = game.getState();
-        const dbWords = await getRandomWordsByCategory(categoryId, sourceLanguage, targetLanguage, 5);
+        const dbWords = await getRandomWordsByCategory(categoryId, sourceLanguage, targetLanguage, 6);
         console.log("dbWords", dbWords)
         const words = dbWords.map(w => {
             const sourceTranslation = w.translations.find(t =>
@@ -150,7 +149,7 @@ export function setupGameHandlers(
         });
     });
 
-    socket.on('game:startGame', () => {
+    socket.on('game:startGame', async () => {
         const game = findGameBySocketId(socket.id, games);
         if (!game) return;
 
@@ -161,6 +160,10 @@ export function setupGameHandlers(
             socket.emit('game:error', 'Only the host can start the game');
             return;
         }
+
+        // Set categories for game based on source and target language
+        const categories = await getRandomCategories(6, state.sourceLanguage, state.targetLanguage);
+        game.setCategories(categories)
 
         try {
             // Start the game using the game engine
