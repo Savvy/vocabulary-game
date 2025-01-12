@@ -61,7 +61,9 @@ export default function WaitingRoom({ state, isHost, startGame }: {
                                     roundTimeLimit: state.roundTimeLimit,
                                     maxRounds: state.maxRounds,
                                     inputType: state.inputType,
-                                    categories: state.categories
+                                    categories: state.categories,
+                                    sourceLanguage: state.sourceLanguage,
+                                    targetLanguage: state.targetLanguage
                                 }}
                             />
                         </div>

@@ -44,8 +44,8 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
     const [open, setOpen] = useState<boolean>(false)
     const [config, setConfig] = useState<GameConfig>({
         ...initialConfig,
-        sourceLanguage: initialConfig.sourceLanguage || 'en',
-        targetLanguage: initialConfig.targetLanguage || 'es'
+        sourceLanguage: initialConfig.sourceLanguage,
+        targetLanguage: initialConfig.targetLanguage,
     })
     const { socket } = useSocket()
     const { toast } = useToast()

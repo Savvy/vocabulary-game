@@ -31,7 +31,9 @@ const initialState: TimeAttackState = {
     inputType: 'multiple-choice',
     categories: [],
     gameStartedAt: undefined,
-    gameEndedAt: undefined
+    gameEndedAt: undefined,
+    sourceLanguage: 'en',
+    targetLanguage: 'es'
 };
 
 type GameAction =
@@ -51,7 +53,7 @@ function gameReducer(state: TimeAttackState, action: GameAction): TimeAttackStat
             if (state.status === 'finished' && action.payload.status === 'finished') {
                 return state;
             }
-            
+
             return {
                 ...state,
                 status: action.payload.status,
@@ -136,11 +138,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         });
 
         const handleGameState = (newState: BaseGameState) => {
-                dispatch({ type: 'SET_STATE', payload: newState as TimeAttackState });
+            dispatch({ type: 'SET_STATE', payload: newState as TimeAttackState });
         };
 
         socket.on('game:state', handleGameState);
-        
+
         return () => {
             socket.off('connect');
             socket.off('disconnect');
@@ -154,7 +156,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         // Handle player joined
         socket.on('game:playerJoined', (player) => {
             dispatch({ type: 'ADD_PLAYER', payload: player });
-            toast({ 
+            toast({
                 title: "Player Joined",
                 description: `${player.nickname} joined the game`,
             });
@@ -214,12 +216,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // Actions
     const joinGame = useCallback((nickname: string, roomId?: string) => {
         if (!socket) return;
-        
+
         const handleConnect = () => {
             console.log('[Socket] Joining game', nickname, roomId);
-            const sourceLanguage = 'en';
-            const targetLanguage = 'es';
-            socket.emit('game:join', { nickname, roomId, sourceLanguage, targetLanguage });
+            socket.emit('game:join', {
+                nickname,
+                roomId,
+                sourceLanguage: state.sourceLanguage,
+                targetLanguage: state.targetLanguage
+            });
             saveSession(nickname, roomId || '');
         };
 

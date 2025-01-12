@@ -71,6 +71,8 @@ export type ClientToServerEvents = {
 };
 
 export interface TimeAttackState extends BaseGameState {
+    sourceLanguage: string;
+    targetLanguage: string;
     currentWord?: Word;
     category?: string;
     currentTurn?: string;

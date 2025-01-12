@@ -258,19 +258,23 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.wordQueue = words;
     }
 
-    // Add a method to update config
     updateConfig(config: Partial<GameConfig>): void {
         if (this.state.status !== 'waiting') {
             throw new Error('Cannot update config after game has started');
         }
 
-        Object.assign(this.config, config);
+        this.config = {
+            ...this.config,
+            ...config
+        };
 
         // Update relevant state properties
         this.state.maxPlayers = config.maxPlayers ?? this.state.maxPlayers;
         this.state.roundTimeLimit = config.roundTimeLimit ?? this.state.roundTimeLimit;
         this.state.maxRounds = config.maxRounds ?? this.state.maxRounds;
         this.state.inputType = config.inputType ?? this.state.inputType;
+        this.state.sourceLanguage = config.sourceLanguage ?? this.state.sourceLanguage;
+        this.state.targetLanguage = config.targetLanguage ?? this.state.targetLanguage;
 
         console.log('[Game] Updated config', this.state);
 
