@@ -56,6 +56,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.state.status = 'playing';
         this.state.currentRound = 1;
         this.state.timeRemaining = this.config.roundTimeLimit;
+        this.state.gameStartedAt = Date.now();
         this.startRound();
     }
 
@@ -243,7 +244,8 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
             category: undefined,
             categoryId: undefined,
             currentTurn: undefined,
-            timeRemaining: 0
+            timeRemaining: 0,
+            gameEndedAt: Date.now()
         };
 
         // Notify state change one last time

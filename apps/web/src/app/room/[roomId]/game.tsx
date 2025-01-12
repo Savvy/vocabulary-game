@@ -12,11 +12,16 @@ import { WordDisplay } from './components/WordDisplay';
 import { ScoreBoard } from './components/ScoreBoard';
 import { GameEndView } from './components/GameEndView';
 
+type LastAnswer = {
+    text: string;
+    isCorrect: boolean | null;
+}
+
 export function TimeAttackGame() {
     const { socket } = useSocket();
     const { state } = useGame();
     const isCurrentTurn = socket?.id === state.currentTurn;
-    const [lastAnswer, setLastAnswer] = useState<{ text: string; isCorrect: boolean | null }>({ text: '', isCorrect: null });
+    const [lastAnswer, setLastAnswer] = useState<LastAnswer>({ text: '', isCorrect: null });
     const [showTurnEnd, setShowTurnEnd] = useState(false);
     const [lastTurn, setLastTurn] = useState<string | null>(null);
 
@@ -53,6 +58,8 @@ export function TimeAttackGame() {
                 wordsAnswered={state.wordsAnswered}
                 scores={state.scores}
                 rounds={state.maxRounds}
+                gameStartedAt={state.gameStartedAt}
+                gameEndedAt={state.gameEndedAt}
             />
         );
     }

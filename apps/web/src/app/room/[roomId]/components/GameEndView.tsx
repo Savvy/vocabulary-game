@@ -15,11 +15,29 @@ interface GameEndViewProps {
     wordsAnswered: Record<string, { correct: number; total: number; }>;
     scores: Record<string, number>;
     rounds: number;
+    gameStartedAt?: number;
+    gameEndedAt?: number;
 }
 
-export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps) {
+export function GameEndView({ players, wordsAnswered, rounds, gameStartedAt, gameEndedAt }: GameEndViewProps) {
     const router = useRouter();
     const { resetGame } = useGame();
+
+    // Calculate game duration
+    const formatDuration = (startTime?: number, endTime?: number) => {
+        console.log('startTime', startTime);
+        console.log('endTime', endTime);
+        if (!startTime || !endTime) return "00:00";
+        const durationInSeconds = Math.floor((endTime - startTime) / 1000);
+        const minutes = Math.floor(durationInSeconds / 60);
+        const seconds = durationInSeconds % 60;
+        console.log('durationInSeconds', durationInSeconds);
+        console.log('minutes', minutes);
+        console.log('seconds', seconds); 
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const gameDuration = formatDuration(gameStartedAt, gameEndedAt);
 
     // Sort players by score
     // const sortedPlayers = [...players].sort((a, b) => scores[b.id] - scores[a.id]);
@@ -71,11 +89,11 @@ export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps
         <div className="max-w-2xl mx-auto p-6 relative">
             <div className="text-center mb-12">
                 <div className="inline-block p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 
-                       to-yellow-500/20 border border-amber-500/20 mb-4">
+                        to-yellow-500/20 border border-amber-500/20 mb-4">
                     <Trophy className="w-8 h-8 text-amber-400" />
                 </div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-amber-200 
-                       bg-clip-text text-transparent mb-2">
+                        bg-clip-text text-transparent mb-2">
                     Game Over!
                 </h1>
                 <p className="text-indigo-300/80">Here&apos;s how everyone performed</p>
@@ -96,7 +114,7 @@ export function GameEndView({ players, wordsAnswered, rounds }: GameEndViewProps
 
             <GameStats
                 totalWords={Object.values(wordsAnswered).reduce((acc, curr) => acc + curr.total, 0)}
-                totalTime="5:32"
+                totalTime={gameDuration}
                 rounds={rounds}
             />
             <Button

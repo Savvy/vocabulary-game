@@ -7,6 +7,8 @@ export interface TimeAttackState extends BaseGameState {
     currentTurn?: string;
     timeRemaining: number;
     timerStartedAt?: number;
+    gameStartedAt?: number;
+    gameEndedAt?: number;
     roundTimeLimit: number;
     hasStartedTurn?: boolean;
     categories: Array<{
