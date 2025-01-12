@@ -9,7 +9,8 @@ interface GameHeaderProps {
 }
 
 export function GameHeader({ currentRound, maxRounds }: GameHeaderProps) {
-    const progress = (currentRound / maxRounds) * 100;
+    const progress = ((currentRound - 1) / maxRounds) * 100;
+    const displayProgress = Math.max(0, progress);
 
     return (
         <Card className="w-full p-4">
@@ -19,12 +20,12 @@ export function GameHeader({ currentRound, maxRounds }: GameHeaderProps) {
                         Round {currentRound} of {maxRounds}
                     </h2>
                     <span className="text-sm text-muted-foreground">
-                        {progress.toFixed(0)}% Complete
+                        {displayProgress.toFixed(0)}% Complete
                     </span>
                 </div>
                 <Progress 
-                    value={progress} 
-                    className="h-2"
+                    value={displayProgress} 
+                    className="h-2 ease-in-out duration-[900ms]"
                 />
             </div>
         </Card>

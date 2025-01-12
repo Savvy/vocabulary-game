@@ -23,6 +23,7 @@ export function GameTimer({ timerStartedAt, roundDuration, isRunning }: GameTime
             }
             if (timeRef.current) {
                 timeRef.current.textContent = `${roundDuration.toFixed(1)}s`;
+                timeRef.current.classList.remove('text-red-500');
             }
             return;
         }
