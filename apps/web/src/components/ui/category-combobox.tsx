@@ -54,33 +54,19 @@ export function CategoryCombobox({
             try {
                 const results = await onSearch(debouncedValue)
                 
-                console.log('results', results)
-                // If we have selected items, ensure they're included in the results
-                if (selected.length > 0) {
-                    const selectedNotInResults = selected.filter(
-                        value => !results.some(c => c.id === value)
-                    )
-                    
-                    if (selectedNotInResults.length > 0) {
-                        const selectedCategories = await Promise.all(
-                            selectedNotInResults.map(value => onSearch(value))
-                        )
-                        
-                        // Combine and deduplicate
-                        const allCategories = [
-                            ...results,
-                            ...selectedCategories.flat()
-                        ].filter((category, index, self) => 
-                            index === self.findIndex(c => c.id === category.id)
-                        )
+                const selectedCategories = selected.map(value => {
+                    const category = categories.find(c => c.id === value)
+                    return category ? category : { id: value, label: value }
+                })
 
-                        console.log('allCategories', allCategories)
-                        setCategories(allCategories)
-                        return
-                    }
-                }
-                console.log('final results', results)
-                setCategories(results)
+                const allCategories = [
+                    ...results,
+                    ...selectedCategories
+                ].filter((category, index, self) => 
+                    index === self.findIndex(c => c.id === category.id)
+                )
+
+                setCategories(allCategories)
             } catch (error) {
                 console.error("Failed to search categories:", error)
                 setCategories([])
@@ -153,14 +139,14 @@ export function CategoryCombobox({
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="w-full p-0" align='start'>
                     <Command shouldFilter={false}>
                         <CommandInput
                             placeholder="Search categories..."
                             value={inputValue}
                             onValueChange={setInputValue}
                         />
-                        <CommandList>
+                        <CommandList className="min-h-[200px]">
                             <CommandEmpty>
                                 {loading ? (
                                     <div className="flex items-center justify-center p-6">

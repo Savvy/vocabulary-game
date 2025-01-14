@@ -128,7 +128,7 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
                     <Settings className="w-5 h-5 text-indigo-400" />
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="sm:max-w-[600px]">
+            <AlertDialogContent className="max-w-3xl">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <AlertDialogHeader>
@@ -288,7 +288,7 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
                                 <CardHeader>
                                     <CardTitle>Word Categories</CardTitle>
                                     <CardDescription>
-                                        Select the categories of words to include in the game
+                                        Categories are used to filter the words in the game. You can add more categories by searching for them.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
