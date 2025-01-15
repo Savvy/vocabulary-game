@@ -20,7 +20,7 @@ import { WordsTableSkeleton } from "./skeleton/words-table-skeleton"
 import { createColumns } from "./columns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { createQueryParams } from "@/lib/utils"
-import { Category } from "@vocab/database"
+import type { Category } from "@vocab/database"
 
 interface WordsTableState {
     columnVisibility: VisibilityState
@@ -36,7 +36,7 @@ const initialState: WordsTableState = {
     isBulkDeleteOpen: false
 }
 
-export function WordsTable({ categories }: { categories: Category[] }) {
+export function WordsTable({ categories }: { categories: (Category & { translations: Array<{ id: string; translation: string; languageId: string }> })[] }) {
     const router = useRouter()
     const [, startTransition] = useTransition()
     const [state, setState] = useState<WordsTableState>(initialState)
@@ -52,8 +52,7 @@ export function WordsTable({ categories }: { categories: Category[] }) {
         clearOnDefault: true
     })
     const [category, setCategory] = useQueryState('category')
-    const [source, setSource] = useQueryState('source')
-    const [target, setTarget] = useQueryState('target')
+    const [language, setLanguage] = useQueryState('language')
 
     // Debounced search
     const debouncedSetSearchQuery = useDebouncedCallback(setSearch, 300)
@@ -68,16 +67,15 @@ export function WordsTable({ categories }: { categories: Category[] }) {
     // Memoized column filters
     const columnFilters = useMemo<ColumnFiltersState>(() => {
         const filters: ColumnFiltersState = []
-        if (search) filters.push({ id: 'word', value: search })
+        if (search) filters.push({ id: 'translations', value: search })
         if (category) filters.push({ id: 'category', value: category })
-        if (source) filters.push({ id: 'sourceLanguage', value: source })
-        if (target) filters.push({ id: 'targetLanguage', value: target })
+        if (language) filters.push({ id: 'language', value: language })
         return filters
-    }, [search, category, source, target])
+    }, [search, category, language])
 
     // Data fetching
     const { data, isLoading } = useQuery({
-        queryKey: ['words', { page, pageSize, sortField, sortOrder, search, category, source, target }],
+        queryKey: ['words', { page, pageSize, sortField, sortOrder, search, category, language }],
         queryFn: async () => {
             const params = createQueryParams({
                 page,
@@ -86,8 +84,7 @@ export function WordsTable({ categories }: { categories: Category[] }) {
                 sortOrder,
                 search,
                 category,
-                source,
-                target
+                language
             })
 
             const response = await fetch(`/api/words?${params}`)
@@ -115,14 +112,12 @@ export function WordsTable({ categories }: { categories: Category[] }) {
     const handleFiltersChange = useCallback((filters: ColumnFiltersState) => {
         startTransition(() => {
             const categoryFilter = filters.find(f => f.id === 'category')?.value as string
-            const sourceFilter = filters.find(f => f.id === 'sourceLanguage')?.value as string
-            const targetFilter = filters.find(f => f.id === 'targetLanguage')?.value as string
+            const languageFilter = filters.find(f => f.id === 'language')?.value as string
 
             setCategory(categoryFilter || null)
-            setSource(sourceFilter || null)
-            setTarget(targetFilter || null)
+            setLanguage(languageFilter || null)
         })
-    }, [setCategory, setSource, setTarget])
+    }, [setCategory, setLanguage])
 
     const handlePaginationChange = useCallback((updatedPage: number, updatedPageSize: number) => {
         startTransition(() => {
@@ -136,8 +131,7 @@ export function WordsTable({ categories }: { categories: Category[] }) {
         onDelete: (word: WordWithRelations) => setState(prev => ({ ...prev, wordToDelete: word })),
         categories: categories.map((category) => ({
             id: category.id,
-            name: category.name,
-            backgroundColor: category.backgroundColor,
+            translations: category.translations,
         }))
     }), [categories])
 
@@ -192,7 +186,7 @@ export function WordsTable({ categories }: { categories: Category[] }) {
             <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-1 items-center gap-4">
                     <Input
-                        placeholder="Filter words..."
+                        placeholder="Search translations..."
                         defaultValue={search}
                         onChange={(e) => debouncedSetSearchQuery(e.target.value)}
                         className="max-w-sm"
@@ -265,7 +259,7 @@ export function WordsTable({ categories }: { categories: Category[] }) {
                             setState(prev => ({ ...prev, wordToDelete: null }))
                             router.refresh()
                         }}
-                        wordText={state.wordToDelete?.word || ""}
+                        wordText={state.wordToDelete?.translations[0]?.translation || ""}
                     />
 
                     <BulkDeleteWordsDialog

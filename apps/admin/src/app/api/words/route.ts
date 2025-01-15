@@ -3,13 +3,12 @@ import { z } from "zod"
 import { getWords, prisma } from "@vocab/database"
 
 const wordSchema = z.object({
-    word: z.string().min(1),
-    translation: z.string().min(1),
+    translations: z.array(z.object({
+        languageId: z.string().min(1),
+        translation: z.string().min(1),
+    })).min(2),
     categoryId: z.string().min(1),
-    sourceLanguageId: z.string().min(1),
-    targetLanguageId: z.string().min(1),
     imageUrl: z.string(),
-    /* notes: z.string().optional(), */
 })
 
 export async function GET(request: Request) {
@@ -19,8 +18,7 @@ export async function GET(request: Request) {
         const pageSize = parseInt(searchParams.get('size') || '10')
         const search = searchParams.get('search') || undefined
         const category = searchParams.get('category') || undefined
-        const source = searchParams.get('source') || undefined
-        const target = searchParams.get('target') || undefined
+        const language = searchParams.get('language') || undefined
         const sortField = searchParams.get('sortField') || undefined
         const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc'
 
@@ -36,8 +34,7 @@ export async function GET(request: Request) {
             pageSize,
             search,
             categoryIds: validCategoryIds,
-            sourceLanguageIds: source ? [source] : undefined,
-            targetLanguageIds: target ? [target] : undefined,
+            languageId: language,
             sortBy: sortField,
             sortOrder
         })
@@ -59,18 +56,23 @@ export async function POST(request: Request) {
 
         const word = await prisma.word.create({
             data: {
-                word: body.word,
-                translation: body.translation,
                 categoryId: body.categoryId,
-                sourceLanguageId: body.sourceLanguageId,
-                targetLanguageId: body.targetLanguageId,
                 imageUrl: body.imageUrl,
-                /* notes: body.notes, */
+                translations: {
+                    create: body.translations
+                }
             },
             include: {
-                category: true,
-                sourceLanguage: true,
-                targetLanguage: true,
+                category: {
+                    include: {
+                        translations: true
+                    }
+                },
+                translations: {
+                    include: {
+                        language: true
+                    }
+                }
             },
         })
 
@@ -85,4 +87,4 @@ export async function POST(request: Request) {
             { status: 500 }
         )
     }
-} 
+}

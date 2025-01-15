@@ -2,11 +2,14 @@ import { Suspense } from "react"
 import { WordsHeader } from "./components/words-header"
 import { WordsTableSkeleton } from "./components/skeleton/words-table-skeleton"
 import { WordsTable } from "./components/words-table"
-import { getAllCategories } from "@vocab/database";
+import { prisma } from "@vocab/database";
 
 export default async function WordsPage() {
-
-    const categories = await getAllCategories();
+    const categories = await prisma.category.findMany({
+        include: {
+            translations: true
+        }
+    });
 
     return (
         <>

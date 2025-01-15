@@ -1,7 +1,6 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Word } from "@vocab/database";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,22 +22,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { WordImagePreview } from "./word-image-preview";
 import { ColumnFilter } from "./column-filters";
-
-type WordWithRelations = Word & {
-	category: { id: string; name: string; backgroundColor: string };
-	sourceLanguage: { id: string; code: string };
-	targetLanguage: { id: string; code: string };
-};
+import { WordWithRelations } from "@/types/words";
 
 interface CreateColumnsOptions {
-	onDelete: (
-		word: Word & {
-			category: { id: string; name: string; backgroundColor: string };
-			sourceLanguage: { id: string; code: string };
-			targetLanguage: { id: string; code: string };
-		}
-	) => void;
-	categories: WordWithRelations["category"][];
+	onDelete: (word: WordWithRelations) => void;
+	categories: Array<{
+		id: string;
+		translations: Array<{
+			id: string;
+			translation: string;
+			languageId: string;
+		}>;
+	}>;
 }
 
 export function createColumns({
@@ -71,7 +66,7 @@ export function createColumns({
 			enableHiding: false,
 		},
 		{
-			accessorKey: "word",
+			accessorKey: "translations",
 			header: ({ column }) => {
 				const sorted = column.getIsSorted();
 				return (
@@ -80,7 +75,7 @@ export function createColumns({
 						onClick={() => column.toggleSorting(sorted === "asc")}
 						className="p-0 hover:bg-transparent"
 					>
-						Word
+						Translations
 						{sorted === "asc" && (
 							<ArrowUp className="ml-2 h-4 w-4" />
 						)}
@@ -91,31 +86,18 @@ export function createColumns({
 					</Button>
 				);
 			},
-			cell: ({ row }) => <div>{row.getValue("word")}</div>,
-			enableSorting: true,
-		},
-		{
-			accessorKey: "translation",
-			header: ({ column }) => {
-				const sorted = column.getIsSorted();
-				return (
-					<Button
-						variant="ghost"
-						onClick={() => column.toggleSorting(sorted === "asc")}
-						className="p-0 hover:bg-transparent"
-					>
-						Translation
-						{sorted === "asc" && (
-							<ArrowUp className="ml-2 h-4 w-4" />
-						)}
-						{sorted === "desc" && (
-							<ArrowDown className="ml-2 h-4 w-4" />
-						)}
-						{!sorted && <ArrowUpDown className="ml-2 h-4 w-4" />}
-					</Button>
-				);
-			},
-			cell: ({ row }) => <div>{row.getValue("translation")}</div>,
+			cell: ({ row }) => (
+				<div className="space-y-1">
+					{row.original.translations.map((t) => (
+						<div key={t.id} className="flex items-center gap-2">
+							<span className="text-xs font-medium uppercase text-muted-foreground">
+								{t.language.code}:
+							</span>
+							<span>{t.translation}</span>
+						</div>
+					))}
+				</div>
+			),
 			enableSorting: true,
 		},
 		{
@@ -125,51 +107,18 @@ export function createColumns({
 					column={column}
 					title="Category"
 					options={categories.map((category) => ({
-						label: category.name,
+						label: category.translations[0]?.translation || 'Untranslated',
 						value: category.id,
 					}))}
 				/>
 			),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
-					<div
-						className="h-2 w-2 rounded-full"
-						style={{
-							backgroundColor:
-								row.original.category.backgroundColor,
-						}}
-					/>
-					{row.original.category.name}
+					{row.original.category.translations[0]?.translation || 'Untranslated'}
 				</div>
 			),
 			filterFn: (row, id, value: string[]) => {
-				return value.includes(row.original.category.id);
-			},
-		},
-		{
-			accessorKey: "languagePair",
-			header: ({ column }) => (
-					<ColumnFilter
-						column={column}
-						title="Language Pair"
-						options={[
-							{ label: "English", value: "en" },
-							{ label: "Spanish", value: "es" },
-						]}
-					/>
-			),
-			cell: ({ row }) => (
-				<div>
-					{row.original.sourceLanguage.code} →{" "}
-					{row.original.targetLanguage.code}
-				</div>
-			),
-			filterFn: (row, id, value: string[]) => {
-				if (!value?.length) return true;
-				return (
-					value.includes(row.original.sourceLanguage.code) ||
-					value.includes(row.original.targetLanguage.code)
-				);
+				return value.includes(row.original.categoryId);
 			},
 		},
 		{
@@ -177,8 +126,8 @@ export function createColumns({
 			header: "Image",
 			cell: ({ row }) => (
 				<WordImagePreview
-					src={row.getValue("imageUrl") || ""}
-					alt={row.getValue("word")}
+					src={row.original.imageUrl}
+					alt={row.original.translations[0]?.translation || 'Word image'}
 				/>
 			),
 		},

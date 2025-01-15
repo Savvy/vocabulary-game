@@ -1,9 +1,23 @@
 export interface WordWithRelations {
     id: string
-    word: string
-    translation: string
-    imageUrl: string | null
-    category: { id: string; name: string; backgroundColor: string }
-    sourceLanguage: { id: string; code: string }
-    targetLanguage: { id: string; code: string }
+    categoryId: string
+    imageUrl: string
+    createdAt: Date
+    updatedAt: Date
+    category: {
+        id: string
+        translations: Array<{
+            id: string
+            translation: string
+            languageId: string
+        }>
+    }
+    translations: Array<{
+        id: string
+        translation: string
+        language: {
+            id: string
+            code: string
+        }
+    }>
 }
