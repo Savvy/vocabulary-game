@@ -5,7 +5,7 @@ import {
     ServerToClientEvents
 } from '@vocab/shared';
 import { TimeAttackGame } from '@vocab/game-engine';
-import { getRandomWordsByCategory, getRandomCategories } from '@vocab/database';
+import { getRandomWordsByCategory, getRandomCategories, getCategories } from '@vocab/database';
 import { GameConfig } from '@vocab/game-engine/src/types';
 
 
@@ -160,8 +160,11 @@ export function setupGameHandlers(
         }
 
         // Set categories for game based on source and target language
-        const categories = await getRandomCategories(6, state.sourceLanguage, state.targetLanguage);
-        game.setCategories(categories)
+        console.log("State categories", state.categories.length)
+        if (state.categories.length === 0) {
+            const categories = await getRandomCategories(6, state.sourceLanguage, state.targetLanguage);
+            game.setCategories(categories)
+        }
 
         try {
             // Start the game using the game engine
@@ -174,7 +177,7 @@ export function setupGameHandlers(
         }
     });
 
-    socket.on('game:updateConfig', (config: Partial<GameConfig>) => {
+    socket.on('game:updateConfig', async (config: Partial<GameConfig>) => {
         const game = findGameBySocketId(socket.id, games);
         if (!game) return;
 
@@ -182,6 +185,16 @@ export function setupGameHandlers(
         if (!player?.isHost) {
             socket.emit('game:error', 'Only the host can update game settings');
             return;
+        }
+
+        if (config.categories) {
+            const categories = await getCategories(
+                config.categories as any as string[],
+                game.getState().sourceLanguage,
+                game.getState().targetLanguage
+            );
+            console.log("Categories from config", categories)
+            config.categories = categories;
         }
 
         try {

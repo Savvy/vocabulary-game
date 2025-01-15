@@ -495,3 +495,50 @@ export async function searchCategories(
 		}))
 	);
 }
+
+export async function getCategories(
+	categoryIds: string[],
+	sourceLanguage?: string,
+	targetLanguage?: string
+) {
+	return prisma.$queryRaw<
+		Array<{
+			id: string;
+			name: string;
+			sourceName: string | null;
+			targetName: string | null;
+			backgroundColor: string;
+			textColor: string;
+		}>
+	>`
+		SELECT 
+			c.id,
+			c."categoryCode" as name,
+			ct_source.translation as "sourceName",
+			ct_target.translation as "targetName",
+			c."backgroundColor",
+			c."textColor"
+		FROM "Category" c
+		LEFT JOIN "CategoryTranslation" ct_source 
+			ON c.id = ct_source."categoryId" 
+			AND ct_source."languageId" = (
+				SELECT id FROM "Language" WHERE code = ${sourceLanguage}
+			)
+		LEFT JOIN "CategoryTranslation" ct_target
+			ON c.id = ct_target."categoryId"
+			AND ct_target."languageId" = (
+				SELECT id FROM "Language" WHERE code = ${targetLanguage}
+			)
+		WHERE c.id = ANY(${categoryIds})
+	`.then((categories) =>
+		categories.map((cat) => ({
+			id: cat.id,
+			name: cat.sourceName || cat.name,
+			translation: cat.targetName || cat.name,
+			style: {
+				backgroundColor: cat.backgroundColor,
+				textColor: cat.textColor,
+			},
+		}))
+	);
+}

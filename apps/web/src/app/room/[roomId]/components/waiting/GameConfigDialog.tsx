@@ -79,6 +79,7 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
     })
 
     function onSubmit(data: GameConfigFormValues) {
+        console.log("Data from config dialog", data)
         socket?.emit('game:updateConfig', data)
         setOpen(false)
         toast({

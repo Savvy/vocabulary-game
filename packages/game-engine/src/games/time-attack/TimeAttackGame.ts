@@ -286,6 +286,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.state.inputType = config.inputType ?? this.state.inputType;
         this.state.sourceLanguage = config.sourceLanguage ?? this.state.sourceLanguage;
         this.state.targetLanguage = config.targetLanguage ?? this.state.targetLanguage;
+        this.state.categories = config.categories ?? this.state.categories;
 
         console.log('[Game] Updated config', this.state);
 
