@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 export * from './word-management';
+export * from './dashboard-management';
 
 declare global {
   var prisma: PrismaClient | undefined;
