@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Category } from "@vocab/database"
+import { Category, CategoryTranslation, Language } from "@vocab/database"
 import { Input } from "@/components/ui/input"
 import { DeleteCategoryDialog } from "./delete-category-dialog"
 import { toast } from "@/hooks/use-toast"
@@ -15,6 +15,9 @@ export interface CategoryWithCount extends Category {
     _count: {
         words: number
     }
+    translations: (CategoryTranslation & {
+        language: Language
+    })[]
 }
 
 const container = {
@@ -59,7 +62,10 @@ export function CategoriesGrid() {
     if (isLoading) return <CategoriesGridSkeleton />
 
     const filteredCategories = categories.filter((category) =>
-        category.name.toLowerCase().includes(search.toLowerCase())
+        category.categoryCode.toLowerCase().includes(search.toLowerCase()) ||
+        category.translations.some(t => 
+            t.translation.toLowerCase().includes(search.toLowerCase())
+        )
     )
 
     const handleDelete = async (category: CategoryWithCount) => {
@@ -127,7 +133,7 @@ export function CategoriesGrid() {
                         setCategoryToDelete(null)
                     }
                 }}
-                categoryName={categoryToDelete?.name || ""}
+                categoryCode={categoryToDelete?.categoryCode || ""}
             />
         </div>
     )

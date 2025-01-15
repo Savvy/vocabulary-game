@@ -14,6 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CategoryWithCount } from "./categories-grid"
+import { Badge } from "@/components/ui/badge"
 
 interface CategoryCardProps {
     category: CategoryWithCount
@@ -22,18 +23,38 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, onDeleteClick, variants }: CategoryCardProps) {
+    console.log(category.backgroundColor)
     return (
         <motion.div
             variants={variants}
         >
             <Card className="relative p-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div
-                            className="h-2.5 w-2.5 rounded-full"
-                            style={{ backgroundColor: category.backgroundColor }}
-                        />
-                        <h3 className="font-semibold">{category.name}</h3>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                            <div
+                                className="h-2.5 w-2.5 rounded-full"
+                                style={{
+                                    backgroundColor: category.backgroundColor.replace('#', '') !== '' 
+                                        ? `${category.backgroundColor}60`
+                                        : undefined,
+                                    borderColor: category.backgroundColor,
+                                    borderWidth: 1.5,
+                                }}
+                            />
+                            <h3 className="font-semibold capitalize">{category.categoryCode}</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                            {category.translations.map((translation) => (
+                                <Badge
+                                    key={translation.id}
+                                    variant="secondary"
+                                    className="text-xs"
+                                >
+                                    {translation.language.code}: {translation.translation}
+                                </Badge>
+                            ))}
+                        </div>
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

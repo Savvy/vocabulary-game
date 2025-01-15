@@ -13,14 +13,14 @@ interface DeleteCategoryDialogProps {
     isOpen: boolean
     onClose: () => void
     onConfirm: () => void
-    categoryName: string
+    categoryCode: string
 }
 
 export function DeleteCategoryDialog({
     isOpen,
     onClose,
     onConfirm,
-    categoryName,
+    categoryCode,
 }: DeleteCategoryDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -28,7 +28,7 @@ export function DeleteCategoryDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Category</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete the category &quot;{categoryName}&quot;? This action
+                        Are you sure you want to delete the category &quot;{categoryCode}&quot;? This action
                         cannot be undone and will affect all words in this category.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
