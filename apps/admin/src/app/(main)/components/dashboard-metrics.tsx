@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Book, Globe2, FolderTree, Clock } from "lucide-react"
+import { Book, Globe2, FolderTree, Clock, Gamepad2 } from "lucide-react"
 
 interface DashboardMetricsProps {
     metrics: {
@@ -14,6 +14,12 @@ interface DashboardMetricsProps {
 
 export function DashboardMetrics({ metrics }: DashboardMetricsProps) {
     const cards = [
+        {
+            title: "Active Games",
+            value: 0,
+            icon: Gamepad2,
+            description: "Games in progress"
+        },
         {
             title: "Total Words",
             value: metrics.totalWords,
@@ -41,7 +47,7 @@ export function DashboardMetrics({ metrics }: DashboardMetricsProps) {
     ]
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             {cards.map((card) => (
                 <Card key={card.title}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
