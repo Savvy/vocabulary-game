@@ -19,11 +19,16 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
+import { TranslationsEditor } from "./translations-editor"
 
 const formSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    /* description: z.string().optional(), */
+    categoryCode: z.string().min(1, "Category code is required"),
+    translations: z.array(z.object({
+        languageId: z.string(),
+        translation: z.string()
+    })),
     backgroundColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format"),
+    textColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format").optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -36,9 +41,10 @@ export function CategoryCreationForm() {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            /* description: "", */
+            categoryCode: "",
+            translations: [],
             backgroundColor: "#000000",
+            textColor: "#ffffff",
         },
     })
 
@@ -81,49 +87,66 @@ export function CategoryCreationForm() {
                     <div className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="categoryCode"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Category Code</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter category name" {...field} />
+                                        <Input placeholder="Enter category code" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="backgroundColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Background Color</FormLabel>
+                                        <FormControl>
+                                            <div className="flex gap-4 items-center">
+                                                <Input type="color" {...field} className="w-24 h-10" />
+                                                <Input {...field} placeholder="#000000" className="flex-1" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="textColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Text Color</FormLabel>
+                                        <FormControl>
+                                            <div className="flex gap-4 items-center">
+                                                <Input type="color" {...field} className="w-24 h-10" />
+                                                <Input {...field} placeholder="#ffffff" className="flex-1" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <FormField
                             control={form.control}
-                            name="backgroundColor"
+                            name="translations"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Color</FormLabel>
                                     <FormControl>
-                                        <div className="flex gap-4 items-center">
-                                            <Input type="color" {...field} className="w-24 h-10" />
-                                            <Input {...field} placeholder="#000000" className="flex-1" />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                       {/*  <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Enter category description..."
-                                            {...field}
+                                        <TranslationsEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                         />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        /> */}
+                        />
                     </div>
                     <Button
                         type="submit"

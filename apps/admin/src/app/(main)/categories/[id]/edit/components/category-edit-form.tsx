@@ -18,22 +18,32 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { Category } from "@vocab/database"
+import { Category, CategoryTranslation, Language } from "@vocab/database"
 import { useQueryClient } from "@tanstack/react-query"
+import { TranslationEditor } from "./translation-editor"
 
 const formSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    /* description: z.string().optional(), */
+    categoryCode: z.string().min(1, "Category code is required"),
+    translations: z.array(z.object({
+        languageId: z.string().min(1, "Language is required"),
+        translation: z.string().min(1, "Translation is required")
+    })),
     backgroundColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format"),
+    textColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format").optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
 
 interface CategoryEditFormProps {
-    category: Category
+    category: Category & {
+        translations: (CategoryTranslation & {
+            language: Language
+        })[]
+    }
+    languages: Language[]
 }
 
-export function CategoryEditForm({ category }: CategoryEditFormProps) {
+export function CategoryEditForm({ category, languages }: CategoryEditFormProps) {
     const router = useRouter()
     const queryClient = useQueryClient()
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,9 +51,13 @@ export function CategoryEditForm({ category }: CategoryEditFormProps) {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: category.name,
-            /* description: category.description ?? "", */
+            categoryCode: category.categoryCode,
             backgroundColor: category.backgroundColor,
+            textColor: category.textColor ?? undefined,
+            translations: category.translations.map(t => ({
+                languageId: t.languageId,
+                translation: t.translation
+            }))
         },
     })
 
@@ -51,18 +65,18 @@ export function CategoryEditForm({ category }: CategoryEditFormProps) {
         try {
             setIsSubmitting(true)
 
-            const response = await fetch(`/api/categories`, {
+            const response = await fetch(`/api/categories/${category.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: category.id,
-                    ...values,
-                }),
+                body: JSON.stringify(values),
             })
 
-            if (!response.ok) throw new Error("Failed to update category")
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(error.message || "Failed to update category")
+            }
 
-            queryClient.invalidateQueries({ queryKey: ['categories'] })
+            await queryClient.invalidateQueries({ queryKey: ['categories'] })
 
             toast({
                 title: "Category updated",
@@ -71,10 +85,10 @@ export function CategoryEditForm({ category }: CategoryEditFormProps) {
 
             router.push("/categories")
             router.refresh()
-        } catch {
+        } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to update category. Please try again.",
+                description: error instanceof Error ? error.message : "Failed to update category. Please try again.",
                 variant: "destructive",
             })
         } finally {
@@ -89,49 +103,67 @@ export function CategoryEditForm({ category }: CategoryEditFormProps) {
                     <div className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="categoryCode"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Name</FormLabel>
+                                    <FormLabel>Category Code</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter category name" {...field} />
+                                        <Input placeholder="Enter category code" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
-                            name="backgroundColor"
-                            render={({ field }) => (
+                            name="translations"
+                            render={() => (
                                 <FormItem>
-                                    <FormLabel>Color</FormLabel>
+                                    <FormLabel>Translations</FormLabel>
                                     <FormControl>
-                                        <div className="flex gap-4 items-center">
-                                            <Input type="color" {...field} className="w-24 h-10" />
-                                            <Input {...field} placeholder="#000000" className="flex-1" />
-                                        </div>
+                                        <TranslationEditor languages={languages} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        {/* <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Enter category description..."
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        /> */}
+
+                        <div className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="backgroundColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Background Color</FormLabel>
+                                        <FormControl>
+                                            <div className="flex gap-4 items-center">
+                                                <Input type="color" {...field} className="w-24 h-10" />
+                                                <Input {...field} placeholder="#000000" className="flex-1" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="textColor"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Text Color</FormLabel>
+                                        <FormControl>
+                                            <div className="flex gap-4 items-center">
+                                                <Input type="color" {...field} className="w-24 h-10" />
+                                                <Input {...field} placeholder="#ffffff" className="flex-1" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
                     <Button
                         type="submit"

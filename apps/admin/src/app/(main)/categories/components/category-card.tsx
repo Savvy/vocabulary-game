@@ -14,7 +14,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CategoryWithCount } from "./categories-grid"
-import { Badge } from "@/components/ui/badge"
 
 interface CategoryCardProps {
     category: CategoryWithCount
@@ -44,7 +43,7 @@ export function CategoryCard({ category, onDeleteClick, variants }: CategoryCard
                             />
                             <h3 className="font-semibold capitalize">{category.categoryCode}</h3>
                         </div>
-                        <div className="flex flex-wrap gap-1">
+                        {/* <div className="flex flex-wrap gap-1">
                             {category.translations.map((translation) => (
                                 <Badge
                                     key={translation.id}
@@ -54,7 +53,7 @@ export function CategoryCard({ category, onDeleteClick, variants }: CategoryCard
                                     {translation.language.code}: {translation.translation}
                                 </Badge>
                             ))}
-                        </div>
+                        </div> */}
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

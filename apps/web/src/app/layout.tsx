@@ -4,6 +4,8 @@ import './globals.css'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
 import { GameProvider } from '@/contexts/GameContext'
+import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,6 +31,11 @@ export default function RootLayout({
           <GameProvider>
             {children}
           </GameProvider>
+          <div className="absolute bottom-2 right-2 z-50">
+            <Badge variant="outline" className='text-white/65 font-light flex items-center gap-2 py-2 text-xs'>
+              <Link href="/admin">Photos provided by <span className='font-bold'>Pexels.com</span></Link>
+            </Badge>
+          </div>
         </div>
         <Toaster />
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-3xl" />

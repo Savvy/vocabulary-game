@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Gamepad2, Languages } from "lucide-react"
+import { BookOpen, Gamepad2, Languages, ColumnsIcon } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -21,6 +21,12 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    {
+      title: "Categories",
+      url: "/categories",
+      icon: ColumnsIcon,
+      isActive: false,
+    },
     {
       title: "Languages",
       url: "/languages",

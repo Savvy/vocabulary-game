@@ -8,9 +8,24 @@ interface CategoryEditPageProps {
 }
 
 export default async function CategoryEditPage({ params }: CategoryEditPageProps) {
-    const category = await prisma.category.findUnique({
-        where: { id: params.id }
-    })
+    const param = await params
+    const [category, languages] = await Promise.all([
+        prisma.category.findUnique({
+            where: { id: param.id },
+            include: {
+                translations: {
+                    include: {
+                        language: true
+                    }
+                }
+            }
+        }),
+        prisma.language.findMany({
+            orderBy: {
+                name: 'asc'
+            }
+        })
+    ])
 
     if (!category) notFound()
 
@@ -18,7 +33,7 @@ export default async function CategoryEditPage({ params }: CategoryEditPageProps
         <>
             <CategoryEditHeader />
             <div className="flex-1 flex flex-col gap-4 p-4">
-                <CategoryEditForm category={category} />
+                <CategoryEditForm category={category} languages={languages} />
             </div>
         </>
     )
