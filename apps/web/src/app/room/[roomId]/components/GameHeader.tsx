@@ -25,7 +25,7 @@ export function GameHeader({ currentRound, maxRounds }: GameHeaderProps) {
                 </div>
                 <Progress 
                     value={displayProgress} 
-                    className="h-2 ease-in-out duration-[900ms]"
+                    className="h-2 ease-in-out"
                 />
             </div>
         </Card>

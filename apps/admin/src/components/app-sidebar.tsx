@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Gamepad2, Languages, ColumnsIcon } from "lucide-react"
+import { BookOpen, Gamepad2, Languages, ColumnsIcon, Users } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -31,12 +31,18 @@ const data = {
       title: "Languages",
       url: "/languages",
       icon: Languages,
-      isActive: true,
+      isActive: false,
     },
     {
       title: "Words",
       url: "/words",
       icon: BookOpen,
+      isActive: false,
+    },
+    {
+      title: "Users",
+      url: "/users",
+      icon: Users,
       isActive: false,
     },
     {
