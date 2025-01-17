@@ -70,6 +70,7 @@ model WordTranslation {
     updatedAt   DateTime @updatedAt
 
     @@unique([wordId, languageId])
+    @@unique([languageId, translation])
     @@index([wordId])
     @@index([languageId])
 }

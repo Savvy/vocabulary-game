@@ -9,6 +9,8 @@ node_modules
 !.yarn/sdks
 !.yarn/versions
 
+data.csv
+
 # Testing
 coverage
 
