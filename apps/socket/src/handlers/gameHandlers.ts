@@ -87,8 +87,7 @@ export function setupGameHandlers(
         const { category, categoryId } = game.getState();
         if (!category || !categoryId) return;
         const { sourceLanguage, targetLanguage } = game.getState();
-        const dbWords = await getRandomWordsByCategory(categoryId, sourceLanguage, targetLanguage, 6);
-        console.log("dbWords", dbWords)
+        const dbWords = await getRandomWordsByCategory(categoryId, sourceLanguage, targetLanguage, 20);
         const words = dbWords.map((w, index) => {
             const sourceTranslation = w.translations.find(t =>
                 t.languageId === sourceLanguage

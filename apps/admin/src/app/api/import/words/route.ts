@@ -5,7 +5,7 @@ import { z } from "zod";
 
 // Schema for language translations in CSV
 // Format: lang_CODE (e.g., lang_en, lang_es, lang_fr)
-const languageSchema = z.record(z.string().regex(/^lang_[a-z]{2}$/), z.string());
+// const languageSchema = z.record(z.string().regex(/^lang_[a-z]{2}$/), z.string());
 
 const csvRowSchema = z.object({
     category: z.string().trim().min(1),
@@ -136,10 +136,17 @@ export async function POST(req: NextRequest) {
                                 }
                             }
                         },
-                        include: {
+                        select: {
+                            id: true,
                             translations: {
-                                include: {
-                                    language: true
+                                select: {
+                                    languageId: true,
+                                    translation: true,
+                                    language: {
+                                        select: {
+                                            code: true
+                                        }
+                                    }
                                 }
                             }
                         }

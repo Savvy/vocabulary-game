@@ -1,5 +1,3 @@
-
-
 import { createQueryParams } from "./utils";
 
 export const getPexelsImage = async (query: string) => {
@@ -10,7 +8,7 @@ export const getPexelsImage = async (query: string) => {
     const queryParams = createQueryParams({
         query,
         per_page: 1,
-        orientation: "square",
+        orientation: "landscape",
     });
     const response = await fetch(`https://api.pexels.com/v1/search?${queryParams}`, {
         headers: {
