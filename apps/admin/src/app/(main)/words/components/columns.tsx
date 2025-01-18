@@ -88,14 +88,7 @@ export function createColumns({
 			},
 			cell: ({ row }) => (
 				<div className="space-y-1">
-					{row.original.translations.map((t) => (
-						<div key={t.id} className="flex items-center gap-2">
-							<span className="text-xs font-medium uppercase text-muted-foreground">
-								{t.language.code}:
-							</span>
-							<span>{t.translation}</span>
-						</div>
-					))}
+					{row.original.translations.length > 0 ? `${row.original.translations.length} translations` : 'Untranslated'}
 				</div>
 			),
 			enableSorting: true,
