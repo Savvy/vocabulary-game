@@ -1,3 +1,5 @@
+import { prisma } from ".";
+
 interface DashboardError extends Error {
 	code: "STATS_ERROR" | "CHART_ERROR";
 	cause?: unknown;
