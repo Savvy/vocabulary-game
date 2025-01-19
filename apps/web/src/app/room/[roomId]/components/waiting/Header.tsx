@@ -1,9 +1,8 @@
 "use client"
 
 import { CopyButton } from "@/components/CopyButton";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Copy, Gamepad2, Users } from "lucide-react"
+import { Gamepad2, Users } from "lucide-react"
 
 interface GameHeaderProps {
     title: string;

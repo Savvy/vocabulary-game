@@ -1,6 +1,7 @@
 "use client"; // Required for Framer Motion
 import { motion } from "framer-motion";
 import { cn } from '@/lib/utils';
+import Image from "next/image";
 
 interface PlayerAvatarProps {
     nickname: string
@@ -29,19 +30,15 @@ export function PlayerAvatar({ nickname, isHost }: PlayerAvatarProps) {
                     "flex items-center justify-center shadow-lg shadow-indigo-500/10",
                     "group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-300"
                 )}>
-                    {/* <User className="w-10 h-10 text-indigo-400" /> */}
-                    <img
-                        src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${nickname.replace(/\s+/g, '+')}`}
-                        alt="avatar"
-                        className="h-full w-full"
-                    />
-                </div>
-                {/* {status === 'ready' && (
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-400 rounded-full 
-                         flex items-center justify-center border-2 border-[#0f1520]">
-                        <div className="w-2 h-2 bg-white rounded-full" />
+                    <div className="relative w-full h-full">
+                        <Image
+                            src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${nickname.replace(/\s+/g, '+')}`}
+                            alt="avatar"
+                            fill
+                            className="h-full w-full"
+                        />
                     </div>
-                )} */}
+                </div>
             </div>
             <div className="text-center">
                 <div className="text-white font-medium">{nickname}</div>
