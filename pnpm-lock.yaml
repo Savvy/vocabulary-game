@@ -83,6 +83,9 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.11.2
         version: 3.11.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@types/bcryptjs':
+        specifier: ^2.4.6
+        version: 2.4.6
       '@vocab/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -150,9 +153,6 @@ importers:
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.2.0
-      '@types/bcryptjs':
-        specifier: ^2.4.6
-        version: 2.4.6
       '@types/node':
         specifier: ^20
         version: 20.17.11
