@@ -1,8 +1,16 @@
 import { prisma } from ".";
+import { Language } from "@prisma/client";
 
 interface DashboardError extends Error {
 	code: "STATS_ERROR" | "CHART_ERROR";
 	cause?: unknown;
+}
+
+interface DashboardStats {
+	totalWords: number;
+	categories: number;
+	languagePairs: number;
+	recentAdditions: number;
 }
 
 function createDashboardError(
@@ -16,7 +24,12 @@ function createDashboardError(
 	return error;
 }
 
-export async function getDashboardStats() {
+function calculateLanguagePairs(languages: Language[]): number {
+	const n = languages.length;
+	return (n * (n - 1)) / 2;
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
 	try {
 		const [totalWords, categories, languages, recentWords] =
 			await Promise.all([
@@ -32,20 +45,10 @@ export async function getDashboardStats() {
 				}),
 			]);
 
-		const languagePairs = new Set<string>();
-		languages.forEach((lang1) => {
-			languages.forEach((lang2) => {
-				if (lang1.id !== lang2.id) {
-					const pair = [lang1.id, lang2.id].sort().join("-");
-					languagePairs.add(pair);
-				}
-			});
-		});
-
 		return {
 			totalWords: Number(totalWords),
 			categories: Number(categories),
-			languagePairs: languagePairs.size,
+			languagePairs: calculateLanguagePairs(languages),
 			recentAdditions: Number(recentWords),
 		};
 	} catch (error) {
