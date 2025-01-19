@@ -10,6 +10,8 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:web": "turbo run build --filter=web...",
+    "build:admin": "turbo run build --filter=admin...",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",
