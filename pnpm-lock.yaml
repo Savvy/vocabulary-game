@@ -180,6 +180,9 @@ importers:
 
   apps/socket:
     dependencies:
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
@@ -211,9 +214,6 @@ importers:
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.17
-      '@types/express':
-        specifier: ^5.0.0
-        version: 5.0.0
       '@types/node':
         specifier: ^20.17.11
         version: 20.17.11
