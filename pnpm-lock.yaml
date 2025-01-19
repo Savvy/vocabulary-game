@@ -265,9 +265,6 @@ importers:
       '@types/canvas-confetti':
         specifier: ^1.9.0
         version: 1.9.0
-      '@vocab/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@vocab/shared':
         specifier: workspace:*
         version: link:../../packages/shared
