@@ -32,9 +32,9 @@ import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
     translations: z.array(z.object({
-        languageId: z.string().min(1),
-        translation: z.string().min(1),
-    })).min(2),
+        languageId: z.string().min(1, "Language is required"),
+        translation: z.string().min(1, "Translation is required")
+    })).min(2, "At least two translations are required"),
     categoryId: z.string().min(1, "Category is required"),
     imageUrl: z.string().optional(),
     notes: z.string().optional(),
@@ -47,7 +47,8 @@ interface WordCreationFormProps {
 
 // Add step validation functions
 function validateStep1(data: z.infer<typeof formSchema>) {
-    return !!(data.translations.length >= 2)
+    return data.translations.length >= 2 && 
+           data.translations.every(t => t.languageId && t.translation)
 }
 
 function validateStep2(data: z.infer<typeof formSchema>) {
@@ -84,7 +85,9 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            translations: [],
+            translations: [
+                { languageId: "", translation: "" },
+            ],
             categoryId: "",
             imageUrl: "",
             notes: "",
@@ -159,97 +162,72 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
                         </div>
                         <p className="text-sm text-muted-foreground text-center">
                             Step {step} of 3: {
-                                step === 1 ? 'Basic Information' :
+                                step === 1 ? 'Translations' :
                                     step === 2 ? 'Category & Image' :
-                                        'Options & Notes'
+                                        'Additional Notes'
                             }
                         </p>
                     </div>
 
                     {step === 1 && (
                         <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="word"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Word</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Enter word" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="translation"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Translation</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Enter translation" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="flex gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="sourceLanguageId"
-                                    render={({ field }) => (
-                                        <FormItem className="flex-1">
-                                            <FormLabel>Source Language</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                            >
+                            {form.getValues().translations.map((_, index) => (
+                                <div key={index} className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name={`translations.${index}.languageId`}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Language {index + 1}</FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select language" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {languages.map((language) => (
+                                                            <SelectItem key={language.id} value={language.id}>
+                                                                {language.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name={`translations.${index}.translation`}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Translation {index + 1}</FormLabel>
                                                 <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select source language" />
-                                                    </SelectTrigger>
+                                                    <Input placeholder="Enter translation" {...field} />
                                                 </FormControl>
-                                                <SelectContent>
-                                                    {languages.map((language) => (
-                                                        <SelectItem key={language.id} value={language.id}>
-                                                            {language.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="targetLanguageId"
-                                    render={({ field }) => (
-                                        <FormItem className="flex-1">
-                                            <FormLabel>Target Language</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select target language" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {languages.map((language) => (
-                                                        <SelectItem key={language.id} value={language.id}>
-                                                            {language.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            ))}
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                    const currentTranslations = form.getValues().translations
+                                    form.setValue('translations', [
+                                        ...currentTranslations,
+                                        { languageId: "", translation: "" }
+                                    ])
+                                }}
+                            >
+                                Add Another Translation
+                            </Button>
                         </div>
                     )}
 
@@ -304,31 +282,6 @@ export function WordCreationForm({ categories, languages }: WordCreationFormProp
 
                     {step === 3 && (
                         <div className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="options"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Options</FormLabel>
-                                        <div className="space-y-2">
-                                            {[0, 1, 2].map((index) => (
-                                                <FormControl key={index}>
-                                                    <Input
-                                                        placeholder={`Option ${index + 1}`}
-                                                        value={field.value[index] || ""}
-                                                        onChange={(e) => {
-                                                            const newOptions = [...field.value]
-                                                            newOptions[index] = e.target.value
-                                                            field.onChange(newOptions)
-                                                        }}
-                                                    />
-                                                </FormControl>
-                                            ))}
-                                        </div>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                             <FormField
                                 control={form.control}
                                 name="notes"
