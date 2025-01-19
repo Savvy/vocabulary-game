@@ -392,12 +392,6 @@ importers:
         specifier: ^5.3.3
         version: 5.7.2
 
-  packages/web:
-    dependencies:
-      '@vocab/shared':
-        specifier: workspace:*
-        version: link:../shared
-
 packages:
 
   /@alloc/quick-lru@5.2.0:
