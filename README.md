@@ -17,7 +17,6 @@ This is a monorepo project managed with Turborepo and pnpm, consisting of multip
 - `packages/database`: Prisma database schema and client
 - `packages/game-engine`: Core game logic and rules
 - `packages/shared`: Shared types and utilities
-- `packages/web`: Shared web components and hooks
 
 ## Tech Stack
 
@@ -134,7 +133,6 @@ To add a new game mode:
 │   ├── database/     # Prisma schema and client
 │   ├── game-engine/  # Game logic
 │   ├── shared/       # Shared utilities
-│   └── web/         # Shared web components
 ```
 
 ## Contributing
