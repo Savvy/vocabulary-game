@@ -29,7 +29,7 @@ This is a monorepo project managed with Turborepo and pnpm, consisting of multip
 - **State Management**: React Server Components + nuqs for URL state
 - **Real-time**: WebSocket (Socket.io)
 - **Package Management**: pnpm + Turborepo
-- **Deployment**: Vercel (web + admin) / Docker (socket)
+- **Deployment**: Vercel (web + admin) / Railway (socket)
 
 ## Features
 
