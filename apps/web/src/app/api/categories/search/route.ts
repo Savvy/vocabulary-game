@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server"
 import { searchCategories } from "@vocab/database"
 
+interface Category {
+    id: string
+    name: string
+    translation: string
+    style: {
+        backgroundColor: string
+        textColor: string
+    }
+}
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
@@ -10,8 +20,7 @@ export async function GET(request: Request) {
 
         const categories = await searchCategories(query, sourceLanguage || undefined, targetLanguage || undefined)
         
-        // Transform the categories to match the expected format
-        const transformedCategories = categories.map(category => ({
+        const transformedCategories = categories.map((category: Category) => ({
             label: category.name,
             id: category.id,
             translation: category.translation,
