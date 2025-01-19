@@ -12,7 +12,8 @@
     "dev": "tsc -w",
     "lint": "eslint .",
     "clean": "rm -rf .turbo node_modules dist",
-    "create-admin": "tsx src/cli/create-admin.ts"
+    "create-admin": "tsx src/cli/create-admin.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
