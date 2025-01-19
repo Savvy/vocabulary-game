@@ -1,11 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["DATABASE_URL", "NEXTAUTH_URL", "NEXTAUTH_SECRET"],
+  "globalEnv": ["DATABASE_URL", "NEXTAUTH_URL", "NEXTAUTH_SECRET", "NODE_ENV"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**", "node_modules/.prisma/**"]
+      "outputs": [".next/**", "dist/**", "node_modules/.prisma/**"],
+      "env": ["NODE_ENV"]
     },
     "db:generate": {
       "cache": false
