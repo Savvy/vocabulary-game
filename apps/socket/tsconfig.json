@@ -6,7 +6,10 @@
     "esModuleInterop": true,
     "strict": true,
     "outDir": "./dist",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node", "express"],
+    "allowJs": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist"]
