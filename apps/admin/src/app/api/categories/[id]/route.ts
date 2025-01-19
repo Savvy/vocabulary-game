@@ -12,13 +12,13 @@ const updateCategorySchema = z.object({
     textColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format").optional(),
 }).partial()
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = await params
+        const params = await props.params
         const json = await request.json()
         const { ...updateData } = json
 
-        if (!id) {
+        if (!params.id) {
             return NextResponse.json(
                 { error: "Category ID is required" },
                 { status: 400 }
@@ -30,7 +30,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         const category = await prisma.$transaction(async (tx) => {
             // Update the category first
             await tx.category.update({
-                where: { id },
+                where: { id: params.id },
                 data: {
                     categoryCode: body.categoryCode,
                     backgroundColor: body.backgroundColor,
@@ -41,14 +41,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             if (body.translations) {
                 // Delete existing translations
                 await tx.categoryTranslation.deleteMany({
-                    where: { categoryId: id }
+                    where: { categoryId: params.id }
                 })
 
                 // Create new translations
                 for (const translation of body.translations) {
                     await tx.categoryTranslation.create({
                         data: {
-                            categoryId: id,
+                            categoryId: params.id,
                             languageId: translation.languageId,
                             translation: translation.translation
                         }
@@ -58,7 +58,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
             // Return the updated category with translations
             return tx.category.findUnique({
-                where: { id },
+                where: { id: params.id },
                 include: {
                     translations: {
                         include: {
@@ -89,9 +89,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await props.params
         const { id } = await params
 
         // Check if category has words

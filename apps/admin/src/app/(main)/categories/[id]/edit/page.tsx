@@ -4,14 +4,14 @@ import { prisma } from "@vocab/database"
 import { notFound } from "next/navigation"
 
 interface CategoryEditPageProps {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export default async function CategoryEditPage({ params }: CategoryEditPageProps) {
-    const param = await params
+    const param = (await params).id
     const [category, languages] = await Promise.all([
         prisma.category.findUnique({
-            where: { id: param.id },
+            where: { id: param },
             include: {
                 translations: {
                     include: {

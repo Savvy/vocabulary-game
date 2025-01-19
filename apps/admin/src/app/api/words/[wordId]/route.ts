@@ -3,9 +3,10 @@ import { deleteWord } from "@vocab/database"
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { wordId: string } }
+    props: { params: Promise<{ wordId: string }> }
 ) {
     try {
+        const params = await props.params
         await deleteWord(params.wordId)
         return NextResponse.json({ success: true })
     } catch {

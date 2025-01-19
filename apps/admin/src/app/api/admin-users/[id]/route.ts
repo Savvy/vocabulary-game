@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const body = await request.json();
         const { name, email } = body;
-
+        const param = (await params).id
         const user = await prisma.adminUser.update({
-            where: { id: params.id },
+            where: { id: param },
             data: { name, email },
             select: {
                 id: true,
@@ -30,11 +30,12 @@ export async function PATCH(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }>    }
 ) {
     try {
+        const param = (await params).id
         await prisma.adminUser.delete({
-            where: { id: params.id },
+            where: { id: param },
         });
 
         return new NextResponse(null, { status: 204 });
