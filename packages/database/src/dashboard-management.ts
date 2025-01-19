@@ -1,5 +1,4 @@
 import { prisma } from ".";
-import { Language } from "@prisma/client";
 
 interface DashboardError extends Error {
 	code: "STATS_ERROR" | "CHART_ERROR";
@@ -24,8 +23,8 @@ function createDashboardError(
 	return error;
 }
 
-function calculateLanguagePairs(languages: Language[]): number {
-	const n = languages.length;
+function calculateLanguagePairs(languages: number): number {
+	const n = languages;
 	return (n * (n - 1)) / 2;
 }
 
@@ -35,7 +34,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 			await Promise.all([
 				prisma.word.count(),
 				prisma.category.count(),
-				prisma.language.findMany(),
+				prisma.language.count(),
 				prisma.word.count({
 					where: {
 						createdAt: {

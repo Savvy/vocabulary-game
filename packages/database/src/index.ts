@@ -1,19 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-export * from './word-management';
-export * from './dashboard-management';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-const prismaClientSingleton = () => {
-  return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  })
-}
-
-export const prisma = globalForPrisma.prisma ?? prismaClientSingleton()
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+})
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export * from '@prisma/client'; 
+export * from './word-management';
+export * from './dashboard-management';
