@@ -2,12 +2,12 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
     "outDir": "./dist",
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "express"],
     "allowJs": true,
     "resolveJsonModule": true
   },
