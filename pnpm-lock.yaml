@@ -215,7 +215,7 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       '@types/node':
-        specifier: ^20.10.5
+        specifier: ^20.17.11
         version: 20.17.11
       cross-env:
         specifier: ^7.0.3
