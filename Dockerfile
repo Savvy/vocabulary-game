@@ -10,33 +10,22 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
 COPY tsconfig.json ./
-COPY .npmrc ./
 
-# Copy packages
-COPY packages/shared ./packages/shared
-COPY packages/database ./packages/database
-COPY packages/game-engine ./packages/game-engine
+# Copy all packages first
+COPY packages/ ./packages/
+
+# Build shared packages first
+RUN pnpm install --filter "@vocab/*" --ignore-scripts
+RUN pnpm --filter "@vocab/shared" build
+RUN pnpm --filter "@vocab/game-engine" build
+
+# Now copy and build the socket app
 COPY apps/socket ./apps/socket
+RUN pnpm install --filter "@vocab/socket"
 
-# Install dependencies
-RUN pnpm install
-
-# Generate Prisma client first
-RUN cd packages/database && pnpm db:generate
-
-# Build shared packages
-RUN pnpm --filter @vocab/shared build
-RUN pnpm --filter @vocab/database build
-RUN pnpm --filter @vocab/game-engine build
-
-# Build socket app
-RUN pnpm --filter @vocab/socket build
-
-# Set working directory to socket app
+# Build the socket app
 WORKDIR /app/apps/socket
-
-# Expose the port
-EXPOSE 4000
+RUN pnpm build
 
 # Start the socket server
 CMD ["pnpm", "start"] 
