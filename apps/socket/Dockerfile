@@ -5,26 +5,18 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy root workspace files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
+# Copy package files
+COPY package.json ./
+COPY tsconfig.json ./
 
-# Copy necessary workspace packages
-COPY packages/shared ./packages/shared
-COPY packages/game-engine ./packages/game-engine
-COPY apps/socket ./apps/socket
+# Copy source code
+COPY src ./src
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages
-RUN pnpm --filter @vocab/shared build
-RUN pnpm --filter @vocab/game-engine build
-
-# Build socket app
-RUN pnpm --filter @vocab/socket build
-
-# Set working directory to socket app
-WORKDIR /app/apps/socket
+# Build the app
+RUN pnpm build
 
 # Expose the port
 EXPOSE 4000
