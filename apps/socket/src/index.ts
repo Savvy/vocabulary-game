@@ -12,6 +12,11 @@ config();
 const app = express();
 app.use(cors());
 
+// Add health check endpoint
+app.get('/', (req: any, res: any) => {
+    res.send('OK');
+});
+
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     cors: {
