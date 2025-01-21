@@ -1,5 +1,5 @@
 import { Player, BaseGameState } from '@vocab/shared';
-import { GameEngine, GameConfig } from './types';
+import { GameEngine, GameConfig } from './types/index.js';
 
 export abstract class BaseGame<TState extends BaseGameState, TAction> implements GameEngine<TState, TAction> {
     protected state: TState;

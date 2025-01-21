@@ -1,7 +1,7 @@
 import { BaseGame } from '../../BaseGame.js';
 import { GameConfig } from '../../types/index.js';
-import { TimeAttackState, TimeAttackAction } from './types';
-import { Word } from '@vocab/shared';
+import { TimeAttackState, TimeAttackAction } from './types.js';
+import { Player, Word } from '@vocab/shared';
 
 
 type TimeAttackConfig = {
@@ -85,7 +85,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
             console.log('[Game] Max rounds:', this.config.maxRounds);
 
             // Check if the current round is complete (all players have had their turn)
-            const currentPlayerIndex = this.state.players.findIndex(p => p.id === this.state.currentTurn);
+            const currentPlayerIndex = this.state.players.findIndex((p: Player) => p.id === this.state.currentTurn);
             const isLastPlayer = currentPlayerIndex === this.state.players.length - 1;
 
             if (isLastPlayer) {
@@ -214,7 +214,7 @@ export class TimeAttackGame extends BaseGame<TimeAttackState, TimeAttackAction> 
         this.state.hasStartedTurn = false;
 
         // Check if all players have had their turn
-        const currentPlayerIndex = this.state.players.findIndex(p => p.id === playerId);
+        const currentPlayerIndex = this.state.players.findIndex((p: Player) => p.id === playerId);
         const isLastPlayer = currentPlayerIndex === this.state.players.length - 1;
 
         if (isLastPlayer) {

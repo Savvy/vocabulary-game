@@ -1,12 +1,14 @@
 import { Server, Socket } from 'socket.io';
 import { nanoid } from 'nanoid';
 import {
+    BaseGameState,
     ClientToServerEvents,
+    Player,
     ServerToClientEvents
 } from '@vocab/shared';
 import { TimeAttackGame } from '@vocab/game-engine';
 import { getRandomWordsByCategory, getRandomCategories, getCategories } from '@vocab/database';
-import { GameConfig } from '@vocab/game-engine/src/types';
+import { GameConfig } from '@vocab/game-engine';
 
 
 export function setupGameHandlers(
@@ -29,7 +31,7 @@ export function setupGameHandlers(
                 targetLanguage,
                 categories: []
             });
-            game.onStateChange = (state) => {
+            game.onStateChange = (state: BaseGameState) => {
                 io.to(targetRoomId).emit('game:state', state);
             };
             games.set(targetRoomId, game);
@@ -151,7 +153,7 @@ export function setupGameHandlers(
         if (!game) return;
 
         const state = game.getState();
-        const player = state.players.find(p => p.id === socket.id);
+        const player = state.players.find((p: Player) => p.id === socket.id);
 
         if (!player?.isHost) {
             socket.emit('game:error', 'Only the host can start the game');
@@ -180,7 +182,7 @@ export function setupGameHandlers(
         const game = findGameBySocketId(socket.id, games);
         if (!game) return;
 
-        const player = game.getState().players.find(p => p.id === socket.id);
+        const player = game.getState().players.find((p: Player) => p.id === socket.id);
         if (!player?.isHost) {
             socket.emit('game:error', 'Only the host can update game settings');
             return;
@@ -222,7 +224,7 @@ export function setupGameHandlers(
 
 function findGameBySocketId(socketId: string, games: Map<string, TimeAttackGame>): TimeAttackGame | undefined {
     for (const game of games.values()) {
-        if (game.getState().players.some(p => p.id === socketId)) {
+        if (game.getState().players.some((p: Player) => p.id === socketId)) {
             return game;
         }
     }

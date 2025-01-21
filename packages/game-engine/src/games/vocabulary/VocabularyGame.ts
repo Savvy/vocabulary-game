@@ -1,5 +1,6 @@
-import { VocabularyState, VocabularyAction } from './types';
-import { BaseGame } from '../../BaseGame';
+import { BaseGame } from '../../BaseGame.js';
+import { VocabularyState, VocabularyAction } from './types.js';
+
 
 export class VocabularyGame extends BaseGame<VocabularyState, VocabularyAction> {
     constructor() {
@@ -13,7 +14,10 @@ export class VocabularyGame extends BaseGame<VocabularyState, VocabularyAction> 
                     basePoints: 3,
                     timeBonus: true,
                     timeBonusMultiplier: 0.1
-                }
+                },
+                inputType: 'multiple-choice',
+                sourceLanguage: 'en',
+                targetLanguage: 'es'
             },
             {
                 timeRemaining: 30,
