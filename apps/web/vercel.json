@@ -1,5 +1,5 @@
 {
-    "buildCommand": "cd ../.. && pnpm install --no-frozen-lockfile && pnpm db:generate && NODE_ENV=production pnpm build",
+    "buildCommand": "cd ../.. && pnpm install --no-frozen-lockfile && pnpm db:generate && NODE_ENV=production pnpm build:web",
     "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile",
     "framework": "nextjs"
 }
