@@ -13,6 +13,7 @@ COPY turbo.json ./
 # Copy packages
 COPY packages/shared ./packages/shared
 COPY packages/game-engine ./packages/game-engine
+COPY packages/database ./packages/database
 COPY apps/socket ./apps/socket
 
 # Install dependencies
@@ -20,6 +21,7 @@ RUN pnpm install
 
 # Build shared packages
 RUN pnpm --filter @vocab/shared build
+RUN pnpm --filter @vocab/database build
 RUN pnpm --filter @vocab/game-engine build
 
 # Build socket app
