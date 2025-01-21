@@ -46,13 +46,25 @@ export async function getRandomWordsByCategory(
 			languageId: string;
 		}>;
 	}>>`
-		WITH RandomWords AS (
-			SELECT DISTINCT w.id, w."imageUrl", w."categoryId", random() as rand
+		WITH WordsWithBothTranslations AS (
+			SELECT DISTINCT w.id
 			FROM "Word" w
-				JOIN "WordTranslation" wt ON w.id = wt."wordId"
-				JOIN "Language" l ON wt."languageId" = l.id
 			WHERE w."categoryId" = ${categoryId}
-				AND l.code IN (${sourceLanguageCode}, ${targetLanguageCode})
+			AND EXISTS (
+				SELECT 1 FROM "WordTranslation" wt1
+				JOIN "Language" l1 ON wt1."languageId" = l1.id
+				WHERE wt1."wordId" = w.id AND l1.code = ${sourceLanguageCode}
+			)
+			AND EXISTS (
+				SELECT 1 FROM "WordTranslation" wt2
+				JOIN "Language" l2 ON wt2."languageId" = l2.id
+				WHERE wt2."wordId" = w.id AND l2.code = ${targetLanguageCode}
+			)
+		),
+		RandomWords AS (
+			SELECT w.id, w."imageUrl", w."categoryId", random() as rand
+			FROM "Word" w
+			WHERE w.id IN (SELECT id FROM WordsWithBothTranslations)
 			ORDER BY rand
 			LIMIT ${count}
 		)
