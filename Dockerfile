@@ -9,15 +9,20 @@ RUN npm install -g pnpm
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
+COPY tsconfig.json ./
+COPY .npmrc ./
 
 # Copy packages
 COPY packages/shared ./packages/shared
-COPY packages/game-engine ./packages/game-engine
 COPY packages/database ./packages/database
+COPY packages/game-engine ./packages/game-engine
 COPY apps/socket ./apps/socket
 
 # Install dependencies
 RUN pnpm install
+
+# Generate Prisma client first
+RUN cd packages/database && pnpm db:generate
 
 # Build shared packages
 RUN pnpm --filter @vocab/shared build
