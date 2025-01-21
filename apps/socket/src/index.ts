@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import { config } from 'dotenv';
 import { ClientToServerEvents, ServerToClientEvents } from '@vocab/shared';
-import { setupGameHandlers } from './handlers/gameHandlers.js';
+import { setupGameHandlers } from './handlers/gameHandlers';
 import { TimeAttackGame } from '@vocab/game-engine';
 
 config();

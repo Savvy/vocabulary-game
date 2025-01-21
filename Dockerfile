@@ -10,19 +10,27 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
 COPY tsconfig.json ./
+COPY .npmrc ./
 
-# Copy all packages
-COPY packages/ ./packages/
+# Copy packages
+COPY packages/shared ./packages/shared
+COPY packages/database ./packages/database
+COPY packages/game-engine ./packages/game-engine
 COPY apps/socket ./apps/socket
 
-# Install all dependencies
+# Install dependencies
 RUN pnpm install
 
-# Generate Prisma client
+# Generate Prisma client first
 RUN cd packages/database && pnpm db:generate
 
-# Build all packages in correct order
-RUN pnpm build
+# Build shared packages
+RUN pnpm --filter @vocab/shared build
+RUN pnpm --filter @vocab/database build
+RUN pnpm --filter @vocab/game-engine build
+
+# Build socket app
+RUN pnpm --filter @vocab/socket build
 
 # Set working directory to socket app
 WORKDIR /app/apps/socket
