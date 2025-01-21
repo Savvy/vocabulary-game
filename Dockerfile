@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install OpenSSL and other required dependencies
+RUN apk add --no-cache openssl openssl-dev
+
 # Install pnpm
 RUN npm install -g pnpm
 
