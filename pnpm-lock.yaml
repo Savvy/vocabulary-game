@@ -382,6 +382,9 @@ importers:
       '@types/node':
         specifier: ^20.10.5
         version: 20.17.11
+      typescript:
+        specifier: ^5.3.3
+        version: 5.7.3
 
   packages/shared:
     dependencies:

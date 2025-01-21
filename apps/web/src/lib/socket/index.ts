@@ -5,6 +5,7 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export const initializeSocket = () => {
     if (!socket) {
+        console.log('Initializing socket with URL:', process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000');
         socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000', {
             autoConnect: true,
             reconnection: true,
