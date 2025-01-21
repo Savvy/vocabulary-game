@@ -12,8 +12,8 @@ COPY tsconfig.json ./
 # Copy source code
 COPY src ./src
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies without frozen lockfile
+RUN pnpm install
 
 # Build the app
 RUN pnpm build
