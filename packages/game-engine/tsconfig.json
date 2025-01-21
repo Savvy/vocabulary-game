@@ -7,7 +7,9 @@
     "declaration": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "composite": true,
+    "rootDir": "./src"
   },
   "include": ["src/**/*"]
 }
