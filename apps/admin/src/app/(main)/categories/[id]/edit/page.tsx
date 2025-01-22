@@ -37,4 +37,4 @@ export default async function CategoryEditPage({ params }: CategoryEditPageProps
             </div>
         </>
     )
-} 
+}

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { Breadcrumb, BreadcrumbLink, BreadcrumbSeparator } from "./ui/breadcrumb"
 import { BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "./ui/breadcrumb"
 import Link from "next/link"
+import React from "react"
 
 interface BreadcrumbItem {
     label: string
@@ -29,32 +30,33 @@ export function DynamicBreadcrumb() {
     return (
         <Breadcrumb>
             <BreadcrumbList>
-                {breadcrumbs.length > 0 ? (
+                {breadcrumbs.length === 0 ? (
                     <BreadcrumbItem>
-                        <BreadcrumbLink asChild>
-                            <Link href="/">Dashboard</Link>
-                        </BreadcrumbLink>
-                        <BreadcrumbSeparator />
+                        <BreadcrumbPage>Dashboard</BreadcrumbPage>
                     </BreadcrumbItem>
                 ) : (
-                    <Breadcrumb>
-                        <BreadcrumbPage>Dashboard</BreadcrumbPage>
-                    </Breadcrumb>
-                )}
-                {breadcrumbs.map((crumb) => (
-                    <BreadcrumbItem key={crumb.path}>
-                        {!crumb.isLast ? (
-                            <>
-                                <BreadcrumbLink asChild>
-                                    <Link href={crumb.path}>{crumb.label}</Link>
-                                </BreadcrumbLink>
+                    <>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
+                                <Link href="/">Dashboard</Link>
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        {breadcrumbs.map((crumb) => (
+                            <React.Fragment key={crumb.path}>
                                 <BreadcrumbSeparator />
-                            </>
-                        ) : (
-                            <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                        )}
-                    </BreadcrumbItem>
-                ))}
+                                <BreadcrumbItem>
+                                    {!crumb.isLast ? (
+                                        <BreadcrumbLink asChild>
+                                            <Link href={crumb.path}>{crumb.label}</Link>
+                                        </BreadcrumbLink>
+                                    ) : (
+                                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                                    )}
+                                </BreadcrumbItem>
+                            </React.Fragment>
+                        ))}
+                    </>
+                )}
             </BreadcrumbList>
         </Breadcrumb>
     )
