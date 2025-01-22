@@ -129,7 +129,7 @@ export function createColumns({
 			header: ({ column }) => (
 				<ColumnFilter
 					column={column}
-					title="Category"
+					title="Categories"
 					options={categories.map((category) => ({
 						label: category.translations?.[0]?.translation || 'Untranslated',
 						value: category.id,

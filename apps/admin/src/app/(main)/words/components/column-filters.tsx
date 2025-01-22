@@ -1,18 +1,26 @@
+import { Button } from "@/components/ui/button"
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuCheckboxItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
-import { Column } from "@tanstack/react-table";
-import { useMemo } from "react";
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "@/components/ui/command"
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { Column } from "@tanstack/react-table"
+import { Check, Filter } from "lucide-react"
+import { useState, useMemo, useCallback } from "react"
 
 interface ColumnFilterProps<TData> {
-	column: Column<TData>;
-	title: string;
-	options: Array<{ label: string; value: string }>;
+	column: Column<TData>
+	title: string
+	options: Array<{ label: string; value: string }>
 }
 
 export function ColumnFilter<TData>({
@@ -20,18 +28,58 @@ export function ColumnFilter<TData>({
 	title,
 	options,
 }: ColumnFilterProps<TData>) {
-	const facetedFilter = column.getFacetedUniqueValues();
-	const selectedValues = useMemo(() => {
-		const values = column.getFilterValue()
-		if (!values) {
-			return new Set()
-		}
-		return new Set(values instanceof Array ? values : (values as string).split(','))
-	}, [column.getFilterValue()])
+	const [open, setOpen] = useState(false)
+	const facetedFilter = column.getFacetedUniqueValues()
+
+	const filterValue = useMemo(() => {
+		const value = column.getFilterValue()
+		return Array.isArray(value) ? value : []
+	}, [column])
+
+	const handleSelect = useCallback(
+		(value: string) => {
+			const newValues = filterValue.includes(value)
+				? filterValue.filter((v) => v !== value)
+				: [...filterValue, value]
+
+			column.setFilterValue(newValues.length ? newValues : undefined)
+		},
+		[column, filterValue]
+	)
+
+	const renderedOptions = useMemo(
+		() => options.map((option) => {
+			const isSelected = filterValue.includes(option.value)
+			const count = facetedFilter?.get(option.value)
+
+			return (
+				<CommandItem
+					key={option.value}
+					onSelect={() => handleSelect(option.value)}
+				>
+					<div className="flex items-center gap-2 flex-1">
+						<Check
+							className={cn(
+								"h-4 w-4",
+								isSelected ? "opacity-100" : "opacity-0"
+							)}
+						/>
+						<span>{option.label}</span>
+					</div>
+					{count && (
+						<span className="ml-auto flex h-4 w-4 items-center justify-center text-xs">
+							{count}
+						</span>
+					)}
+				</CommandItem>
+			)
+		}),
+		[options, filterValue, facetedFilter, handleSelect]
+	)
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
 				<Button
 					variant="ghost"
 					size="sm"
@@ -39,39 +87,24 @@ export function ColumnFilter<TData>({
 				>
 					<Filter className="mr-2 h-4 w-4" />
 					{title}
-					{selectedValues?.size > 0 && (
+					{filterValue.length > 0 && (
 						<div className="ml-2 rounded-sm bg-primary px-1 text-xs text-primary-foreground">
-							{selectedValues.size}
+							{filterValue.length}
 						</div>
 					)}
 				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="start" className="w-[200px]">
-				{options.map((option) => (
-					<DropdownMenuCheckboxItem
-						key={option.value}
-						checked={selectedValues?.has(option.value)}
-						onCheckedChange={(checked) => {
-							if (checked) {
-								selectedValues.add(option.value);
-							} else {
-								selectedValues.delete(option.value);
-							}
-							const filterValues = Array.from(selectedValues);
-							column.setFilterValue(
-								filterValues.length ? filterValues : undefined
-							);
-						}}
-					>
-						{option.label}
-						{facetedFilter?.get(option.value) && (
-							<span className="ml-auto flex h-4 w-4 items-center justify-center text-xs">
-								{facetedFilter.get(option.value)}
-							</span>
-						)}
-					</DropdownMenuCheckboxItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
+			</PopoverTrigger>
+			<PopoverContent className="w-[200px] p-0" align="start">
+				<Command>
+					<CommandInput placeholder={`Search ${title.toLowerCase()}...`} />
+					<CommandList>
+						<CommandEmpty>No results found.</CommandEmpty>
+						<CommandGroup heading={title}>
+							{renderedOptions}
+						</CommandGroup>
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
+	)
 }
