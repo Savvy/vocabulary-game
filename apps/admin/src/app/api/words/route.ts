@@ -2,6 +2,19 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getWords, prisma } from "@vocab/database"
 
+// Input validation schemas
+const sortByEnum = z.enum(['createdAt', 'translations', 'updatedAt'])
+const sortOrderEnum = z.enum(['asc', 'desc'])
+const querySchema = z.object({
+    page: z.coerce.number().positive().default(1),
+    size: z.coerce.number().positive().default(10),
+    search: z.string().optional(),
+    category: z.string().optional(),
+    language: z.string().optional(),
+    sortField: sortByEnum.optional().default('createdAt'),
+    sortOrder: sortOrderEnum.optional().default('desc'),
+})
+
 const wordSchema = z.object({
     translations: z.array(z.object({
         languageId: z.string().min(1),
@@ -14,34 +27,48 @@ const wordSchema = z.object({
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
-        const page = parseInt(searchParams.get('page') || '1')
-        const pageSize = parseInt(searchParams.get('size') || '10')
-        const search = searchParams.get('search') || undefined
-        const category = searchParams.get('category') || undefined
-        const language = searchParams.get('language') || undefined
-        const sortField = searchParams.get('sortField') || undefined
-        const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc'
 
-        let validCategoryIds = undefined
-        if (category && category.includes(',')) {
-            validCategoryIds = category.split(',')
-        } else if (category) {
-            validCategoryIds = [category]
-        }
+        console.log(searchParams.toString())
+        
+        // Parse and validate query parameters
+        const params = querySchema.parse({
+            page: searchParams.get('page') ?? undefined,
+            size: searchParams.get('size') ?? undefined,
+            search: searchParams.get('search') ?? undefined,
+            category: searchParams.get('category') ?? undefined,
+            language: searchParams.get('language') ?? undefined,
+            sortField: searchParams.get('sortField') ?? undefined,
+            sortOrder: searchParams.get('sortOrder') ?? undefined,
+        })
+
+        // Process category IDs
+        const categoryIds = params.category?.split(',').filter(Boolean)
+
+        console.log(categoryIds)
 
         const result = await getWords({
-            page,
-            pageSize,
-            search,
-            categoryIds: validCategoryIds,
-            languageId: language,
-            sortBy: sortField,
-            sortOrder
+            page: params.page,
+            pageSize: params.size,
+            search: params.search,
+            categoryIds: categoryIds,
+            languageId: params.language,
+            sortBy: params.sortField,
+            sortOrder: params.sortOrder,
         })
+
+        console.log(result);
 
         return NextResponse.json(result)
     } catch (error) {
         console.error('Failed to fetch words:', error)
+        
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                { error: "Invalid parameters", details: error.errors },
+                { status: 400 }
+            )
+        }
+
         return NextResponse.json(
             { error: "Failed to fetch words" },
             { status: 500 }
@@ -78,12 +105,17 @@ export async function POST(request: Request) {
 
         return NextResponse.json(word)
     } catch (error) {
+        console.error('Failed to create word:', error)
+        
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: error.errors }, { status: 400 })
+            return NextResponse.json(
+                { error: "Invalid input", details: error.errors },
+                { status: 400 }
+            )
         }
 
         return NextResponse.json(
-            { error: "Internal Server Error" },
+            { error: "Failed to create word" },
             { status: 500 }
         )
     }

@@ -23,6 +23,7 @@ import {
 import { WordImagePreview } from "./word-image-preview";
 import { ColumnFilter } from "./column-filters";
 import { WordWithRelations } from "@/types/words";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CreateColumnsOptions {
 	onDelete: (word: WordWithRelations) => void;
@@ -86,11 +87,41 @@ export function createColumns({
 					</Button>
 				);
 			},
-			cell: ({ row }) => (
-				<div className="space-y-1">
-					{row.original.translations.length > 0 ? `${row.original.translations.length} translations` : 'Untranslated'}
-				</div>
-			),
+			cell: ({ row }) => {
+				const translations = row.original.translations;
+				if (!translations?.length) return "No translations";
+
+				return (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger>
+								{translations[0].translation}
+								<span className="ml-1.5 text-sm text-muted-foreground">
+									({translations.length - 1} more)
+								</span>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div className="font-semibold">
+									Translations ({translations.length}):
+								</div>
+								<div className="flex flex-col gap-1">
+									{translations.slice(0, 4)
+										.map((translation) => {
+											return (
+												<div key={translation.id}>
+													{translation.translation} (<span className="text-muted-foreground">{translation.language.code}</span>)
+												</div>
+											)
+										})}
+								</div>
+								{translations.length > 4 && <span className="ml-1.5 text-sm text-muted-foreground">
+									({translations.length - 4} more)
+								</span>}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				);
+			},
 			enableSorting: true,
 		},
 		{
@@ -100,14 +131,14 @@ export function createColumns({
 					column={column}
 					title="Category"
 					options={categories.map((category) => ({
-						label: category.translations[0]?.translation || 'Untranslated',
+						label: category.translations?.[0]?.translation || 'Untranslated',
 						value: category.id,
 					}))}
 				/>
 			),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
-					{row.original.category.translations[0]?.translation || 'Untranslated'}
+					{row.original.category.translations?.[0]?.translation || 'No category translations'}
 				</div>
 			),
 			filterFn: (row, id, value: string[]) => {

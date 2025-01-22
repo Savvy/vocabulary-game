@@ -1,5 +1,29 @@
 import { Prisma, prisma } from "./index";
 
+interface WordWithRelations {
+	id: string;
+	categoryId: string;
+	imageUrl: string;
+	createdAt: Date;
+	updatedAt: Date;
+	category: {
+		id: string;
+		translations: Array<{
+			id: string;
+			translation: string;
+			languageId: string;
+		}>;
+	};
+	translations: Array<{
+		id: string;
+		translation: string;
+		language: {
+			id: string;
+			code: string;
+		};
+	}>;
+}
+
 export async function createWord(data: {
 	translations: Array<{
 		languageId: string;
@@ -142,88 +166,148 @@ export async function getRandomCategories(
 	);
 }
 
-export async function getWords(params: {
+interface GetWordsParams {
 	search?: string;
 	categoryIds?: string[];
 	languageId?: string;
 	page?: number;
 	pageSize?: number;
-	sortBy?: string;
-	sortOrder?: "asc" | "desc";
-}) {
+	sortBy?: 'createdAt' | 'translations' | 'updatedAt';
+	sortOrder?: 'asc' | 'desc';
+}
+
+export async function getWords(params: GetWordsParams) {
 	const {
-		search,
+		search = '',
 		categoryIds,
 		languageId,
 		page = 1,
 		pageSize = 10,
-		sortBy = "createdAt",
-		sortOrder = "desc",
+		sortBy = 'createdAt',
+		sortOrder = 'desc',
 	} = params;
 
-	const whereConditions: Prisma.WordWhereInput[] = [];
+	// Validate sort parameters
+	const validSortFields = ['createdAt', 'translations', 'updatedAt'] as const;
+	if (!validSortFields.includes(sortBy as any)) {
+		throw new Error(`Invalid sort field: ${sortBy}`);
+	}
 
-	if (search) {
-		whereConditions.push({
+	const where = {
+		...(search ? {
 			translations: {
 				some: {
-					translation: {
-						contains: search,
-						mode: "insensitive"
+					translation: { 
+						contains: search, 
+						mode: Prisma.QueryMode.insensitive 
 					}
 				}
 			}
-		});
-	}
-
-	if (categoryIds?.length) {
-		whereConditions.push({
-			categoryId: {
-				in: categoryIds
-			}
-		});
-	}
-
-	if (languageId) {
-		whereConditions.push({
+		} : {}),
+		...(categoryIds?.length ? { categoryId: { in: categoryIds } } : {}),
+		...(languageId ? {
 			translations: {
-				some: {
-					languageId
-				}
+				some: { languageId }
 			}
-		});
+		} : {})
+	};
+
+	if (sortBy === "translations") { 
+		const words = await prisma.$queryRaw<Array<WordWithRelations>>`
+			SELECT 
+				w.id,
+				w."categoryId",
+				w."imageUrl",
+				w."createdAt"::text as "createdAt",
+				w."updatedAt"::text as "updatedAt",
+				CAST(COUNT(wt.id) AS INTEGER) as translation_count,
+				json_agg(
+					json_build_object(
+						'id', wt.id,
+						'translation', wt.translation,
+						'language', json_build_object(
+							'id', l.id,
+							'code', l.code
+						)
+					)
+				) as translations,
+				json_build_object(
+					'id', c.id,
+					'translations', (
+						SELECT json_agg(
+							json_build_object(
+								'id', ct.id,
+								'translation', ct.translation,
+								'languageId', ct."languageId"
+							)
+						)
+						FROM "CategoryTranslation" ct
+						WHERE ct."categoryId" = c.id
+					)
+				) as category
+			FROM "Word" w
+			LEFT JOIN "WordTranslation" wt ON w.id = wt."wordId"
+			LEFT JOIN "Language" l ON wt."languageId" = l.id
+			LEFT JOIN "Category" c ON w."categoryId" = c.id
+			WHERE 1=1
+			${search ? Prisma.sql`AND EXISTS (
+				SELECT 1 FROM "WordTranslation" wt2 
+				WHERE wt2."wordId" = w.id 
+				AND LOWER(wt2.translation) LIKE LOWER(${`%${search}%`})
+			)` : Prisma.sql``}
+			${categoryIds?.length ? Prisma.sql`AND w."categoryId" = ANY(${categoryIds})` : Prisma.sql``}
+			${languageId ? Prisma.sql`AND EXISTS (
+				SELECT 1 FROM "WordTranslation" wt3 
+				WHERE wt3."wordId" = w.id 
+				AND wt3."languageId" = ${languageId}
+			)` : Prisma.sql``}
+			GROUP BY w.id, c.id
+			ORDER BY translation_count ${sortOrder === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`}
+			LIMIT ${pageSize}
+			OFFSET ${(page - 1) * pageSize}
+		`;
+
+		const total = await prisma.word.count({ where });
+
+		return {
+			words: words.map(word => ({
+				...word,
+				createdAt: new Date(word.createdAt).toISOString(),
+				updatedAt: new Date(word.updatedAt).toISOString()
+			})),
+			total,
+			pageCount: Math.ceil(total / pageSize)
+		};
 	}
 
-	const where: Prisma.WordWhereInput = whereConditions.length 
-		? { AND: whereConditions }
-		: {};
-
-	const [total, words] = await Promise.all([
-		prisma.word.count({ where }),
-		prisma.word.findMany({
-			where,
-			include: {
-				category: {
-					include: {
-						translations: true
-					}
-				},
-				translations: {
-					include: {
-						language: true
-					}
+	// Handle other sort cases
+	const words = await prisma.word.findMany({
+		where,
+		include: {
+			category: {
+				include: {
+					translations: true
 				}
 			},
-			orderBy: { [sortBy]: sortOrder },
-			skip: (page - 1) * pageSize,
-			take: pageSize,
-		}),
-	]);
+			translations: {
+				include: {
+					language: true
+				}
+			}
+		},
+		orderBy: {
+			[sortBy]: sortOrder
+		},
+		take: pageSize,
+		skip: (page - 1) * pageSize
+	});
 
-	return { 
-		words, 
-		total, 
-		pageCount: Math.ceil(total / pageSize) 
+	const total = await prisma.word.count({ where });
+
+	return {
+		words,
+		total,
+		pageCount: Math.ceil(total / pageSize)
 	};
 }
 
