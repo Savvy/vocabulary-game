@@ -32,7 +32,7 @@ export function PlayerAvatar({ nickname, isHost }: PlayerAvatarProps) {
                 )}>
                     <div className="relative w-full h-full">
                         <Image
-                            src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${nickname.replace(/\s+/g, '+')}`}
+                            src={`https://api.dicebear.com/9.x/thumbs/webp?seed=${nickname.replace(/\s+/g, '+')}`}
                             alt="avatar"
                             fill
                             className="h-full w-full"
