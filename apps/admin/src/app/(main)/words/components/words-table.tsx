@@ -43,7 +43,7 @@ export function WordsTable({ categories }: { categories: (Category & { translati
 
     // URL Query Parameters
     const [page, setPage] = useQueryState('page', { defaultValue: '1' })
-    const [pageSize, setPageSize] = useQueryState('size', { defaultValue: '10' })
+    const [pageSize, setPageSize] = useQueryState('pageSize', { defaultValue: '10' })
     const [sortField, setSortField] = useQueryState('sortField')
     const [sortOrder, setSortOrder] = useQueryState('sortOrder')
     const [search, setSearch] = useQueryState('search', {
@@ -121,10 +121,14 @@ export function WordsTable({ categories }: { categories: (Category & { translati
 
     const handlePaginationChange = useCallback((updatedPage: number, updatedPageSize: number) => {
         startTransition(() => {
-            setPage((updatedPage + 1).toString())
-            setPageSize(updatedPageSize.toString())
+            if (Number(pageSize) !== updatedPageSize) {
+                setPageSize(updatedPageSize.toString())
+                setPage("1") // Reset to first page when changing page size
+            } else {
+                setPage((updatedPage + 1).toString())
+            }
         })
-    }, [setPage, setPageSize])
+    }, [setPage, setPageSize, pageSize])
 
     // Table configuration
     const columns = useMemo(() => createColumns({
@@ -149,6 +153,9 @@ export function WordsTable({ categories }: { categories: (Category & { translati
                 pageSize: Number(pageSize),
             },
         },
+        manualPagination: true,
+        getPaginationRowModel: undefined,
+        onPaginationChange: undefined,
         onSortingChange: (updaterOrValue) => {
             const newSorting = typeof updaterOrValue === 'function'
                 ? updaterOrValue(table.getState().sorting)
@@ -174,7 +181,6 @@ export function WordsTable({ categories }: { categories: (Category & { translati
             setState(prev => ({ ...prev, rowSelection: selection }))
         },
         getCoreRowModel: getCoreRowModel(),
-        manualPagination: true,
         manualSorting: true,
         manualFiltering: true,
         enableColumnFilters: true,

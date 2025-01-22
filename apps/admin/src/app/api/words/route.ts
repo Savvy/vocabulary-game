@@ -7,7 +7,7 @@ const sortByEnum = z.enum(['createdAt', 'translations', 'updatedAt'])
 const sortOrderEnum = z.enum(['asc', 'desc'])
 const querySchema = z.object({
     page: z.coerce.number().positive().default(1),
-    size: z.coerce.number().positive().default(10),
+    pageSize: z.coerce.number().positive().default(10),
     search: z.string().optional(),
     category: z.string().optional(),
     language: z.string().optional(),
@@ -27,13 +27,10 @@ const wordSchema = z.object({
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
-
-        console.log(searchParams.toString())
-        
         // Parse and validate query parameters
         const params = querySchema.parse({
             page: searchParams.get('page') ?? undefined,
-            size: searchParams.get('size') ?? undefined,
+            pageSize: searchParams.get('pageSize') ?? undefined,
             search: searchParams.get('search') ?? undefined,
             category: searchParams.get('category') ?? undefined,
             language: searchParams.get('language') ?? undefined,
@@ -44,19 +41,15 @@ export async function GET(request: Request) {
         // Process category IDs
         const categoryIds = params.category?.split(',').filter(Boolean)
 
-        console.log(categoryIds)
-
         const result = await getWords({
             page: params.page,
-            pageSize: params.size,
+            pageSize: params.pageSize,
             search: params.search,
             categoryIds: categoryIds,
             languageId: params.language,
             sortBy: params.sortField,
             sortOrder: params.sortOrder,
         })
-
-        console.log(result);
 
         return NextResponse.json(result)
     } catch (error) {

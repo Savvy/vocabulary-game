@@ -166,13 +166,13 @@ export async function getRandomCategories(
 	);
 }
 
-interface GetWordsParams {
+export interface GetWordsParams {
 	search?: string;
 	categoryIds?: string[];
 	languageId?: string;
 	page?: number;
 	pageSize?: number;
-	sortBy?: 'createdAt' | 'translations' | 'updatedAt';
+	sortBy?: string;
 	sortOrder?: 'asc' | 'desc';
 }
 
