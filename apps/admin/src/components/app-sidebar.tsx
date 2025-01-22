@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Gamepad2, Languages, ColumnsIcon, Users } from "lucide-react"
+import { BookOpen, Gamepad2, Languages, ColumnsIcon, Users, LayoutDashboardIcon } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -22,34 +22,41 @@ const data = {
   },
   navMain: [
     {
-      title: "Categories",
-      url: "/categories",
-      icon: ColumnsIcon,
+      title: "Dashboard",
+      url: "/",
+      icon: LayoutDashboardIcon,
       isActive: false,
+    },
+    {
+      title: "Games",
+      url: "/games",
+      icon: Gamepad2,
     },
     {
       title: "Languages",
-      url: "/languages",
       icon: Languages,
-      isActive: false,
-    },
-    {
-      title: "Words",
-      url: "/words",
-      icon: BookOpen,
-      isActive: false,
+      items: [
+        {
+          title: "Categories",
+          url: "/categories",
+          icon: ColumnsIcon,
+        },
+        {
+          title: "Languages",
+          url: "/languages",
+          icon: Languages,
+        },
+        {
+          title: "Words",
+          url: "/words",
+          icon: BookOpen,
+        },
+      ]
     },
     {
       title: "Users",
       url: "/users",
       icon: Users,
-      isActive: false,
-    },
-    {
-      title: "Games",
-      url: "/",
-      icon: Gamepad2,
-      isActive: false,
     },
   ]
 }

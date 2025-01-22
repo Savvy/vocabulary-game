@@ -7,7 +7,7 @@ import { DashboardMetricsSkeleton } from "./components/skeleton/dashboard-metric
 import { DashboardChartsSkeleton } from "./components/skeleton/dashboard-charts-skeleton"
 import { DashboardHeader } from "./components/dashboard-header"
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
   return (
     <>
       <DashboardHeader />
