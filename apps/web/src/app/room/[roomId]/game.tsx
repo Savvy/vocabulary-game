@@ -32,13 +32,16 @@ export function TimeAttackGame() {
         const isTurnChange = lastTurn &&
             lastTurn !== currentTurnId &&
             state.wordsAnswered[lastTurn]?.total > 0 &&
-            state.status === 'playing';
+            state.status === 'playing' &&
+            !state.currentWord &&
+            !state.hasStartedTurn;
 
         const isRoundChange = state.currentRound > 1 &&
             !state.category &&
             !state.currentWord &&
             state.status === 'playing' &&
-            state.currentTurn;
+            state.currentTurn &&
+            !state.hasStartedTurn;
 
         if (isRoundChange || isTurnChange) {
             setShowTurnEnd(true);
@@ -49,7 +52,16 @@ export function TimeAttackGame() {
         if (currentTurnId !== lastTurn) {
             setLastTurn(currentTurnId || null);
         }
-    }, [state.currentTurn, state.currentRound, state.status, state.wordsAnswered, state.currentWord, state.category, lastTurn]);
+    }, [
+        state.currentTurn,
+        state.currentRound,
+        state.status,
+        state.wordsAnswered,
+        state.currentWord,
+        state.category,
+        state.hasStartedTurn,
+        lastTurn
+    ]);
 
     if (state.status === 'finished') {
         return (
@@ -79,14 +91,15 @@ export function TimeAttackGame() {
                 />
             </div>
 
-            <TurnEndAlert
-                show={showTurnEnd}
-                currentRound={state.currentRound}
-                players={state.players}
-                currentTurn={state.currentTurn}
-                wordsAnswered={state.wordsAnswered}
-                scores={state.scores}
-            />
+            {showTurnEnd ? (
+                <TurnEndAlert
+                    currentRound={state.currentRound}
+                    players={state.players}
+                    currentTurn={state.currentTurn}
+                    wordsAnswered={state.wordsAnswered}
+                    scores={state.scores}
+                />
+            ) : null}
 
             <div className="w-full grid gap-6 lg:grid-cols-[1fr,350px]">
                 <div className="space-y-6">

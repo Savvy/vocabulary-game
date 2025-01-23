@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '@vocab/shared';
 
 interface TurnEndAlertProps {
-    show: boolean;
     currentRound: number;
     players: Player[];
     currentTurn: string | undefined;
@@ -14,8 +13,7 @@ interface TurnEndAlertProps {
     scores: Record<string, number>;
 }
 
-export function TurnEndAlert({ 
-    show, 
+export function TurnEndAlert({
     currentRound, 
     players, 
     currentTurn,
@@ -24,8 +22,6 @@ export function TurnEndAlert({
 }: TurnEndAlertProps) {
     const nextPlayer = players.find(p => p.id === currentTurn);
     const lastPlayer = players.find(p => wordsAnswered[p.id]?.total > 0);
-
-    if (!show) return null;
 
     return (
         <AnimatePresence>
