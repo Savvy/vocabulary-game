@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6">
+    <div className="flex flex-col items-center justify-center h-full p-6">
       <Header />
       <Suspense fallback={
         <div className="w-full max-w-md animate-pulse">

@@ -77,7 +77,7 @@ export function TimeAttackGame() {
     }
 
     return (
-        <div className="flex flex-col items-center gap-8 w-full max-w-7xl p-6 mx-auto">
+        <div className="h-full overflow-y-hidden flex flex-col items-center gap-8 w-full max-w-7xl p-6 mx-auto">
             <div className="flex items-center gap-8 w-full">
                 <GameHeader
                     currentRound={state.currentRound}

@@ -23,11 +23,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={cn(
         inter.className,
-        "dark",
-        "min-h-screen antialiased relative"
+        "dark antialiased relative h-screen overflow-hidden"
       )}>
         {/* Gradient blobs */}
-        <div className="relative z-10 min-h-screen backdrop-blur-3xl bg-background/50">
+        <div className="relative z-10 h-full backdrop-blur-3xl bg-background/50">
           <GameProvider>
             {children}
           </GameProvider>

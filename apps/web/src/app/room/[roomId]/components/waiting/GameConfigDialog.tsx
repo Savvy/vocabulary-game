@@ -91,7 +91,7 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
     async function searchCategories(query: string): Promise<Category[]> {
         const { sourceLanguage, targetLanguage } = form.getValues()
         const response = await fetch(`/api/categories/search?q=${encodeURIComponent(query)}&sourceLanguage=${sourceLanguage}&targetLanguage=${targetLanguage}`)
-        
+
         if (!response.ok) {
             toast({
                 title: "Error",
@@ -129,206 +129,206 @@ export function GameConfigDialog({ initialConfig }: GameConfigDialogProps) {
                     <Settings className="w-5 h-5 text-indigo-400" />
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="max-w-3xl">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Game Configuration</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Configure the game settings and categories.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <div className="grid gap-6 py-4">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Game Rules</CardTitle>
-                                    <CardDescription>
-                                        Set the rules for the game.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="grid gap-4">
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <FormField
-                                            control={form.control}
-                                            name="maxPlayers"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Max Players</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="number" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+            <AlertDialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Game Configuration</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Configure the game settings and categories.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <div className="grid gap-6 py-4">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Game Rules</CardTitle>
+                                        <CardDescription>
+                                            Set the rules for the game.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="grid gap-4">
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="maxPlayers"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Max Players</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
 
-                                        <FormField
-                                            control={form.control}
-                                            name="roundTimeLimit"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Round Time (seconds)</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="number" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                                            <FormField
+                                                control={form.control}
+                                                name="roundTimeLimit"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Round Time (seconds)</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
 
+                                            <FormField
+                                                control={form.control}
+                                                name="maxRounds"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Max Rounds</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
                                         <FormField
                                             control={form.control}
-                                            name="maxRounds"
+                                            name="inputType"
                                             render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Max Rounds</FormLabel>
+                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                                    <div className="space-y-0.5">
+                                                        <FormLabel className="text-base">
+                                                            Multiple Choice
+                                                        </FormLabel>
+                                                        <FormDescription>
+                                                            Enable multiple choice answers instead of text input
+                                                        </FormDescription>
+                                                    </div>
                                                     <FormControl>
-                                                        <Input type="number" {...field} />
+                                                        <Switch
+                                                            checked={field.value === 'multiple-choice'}
+                                                            onCheckedChange={(checked) =>
+                                                                field.onChange(checked ? 'multiple-choice' : 'single-choice')
+                                                            }
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
-                                    </div>
-                                    <FormField
-                                        control={form.control}
-                                        name="inputType"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                                <div className="space-y-0.5">
-                                                    <FormLabel className="text-base">
-                                                        Multiple Choice
-                                                    </FormLabel>
+                                    </CardContent>
+                                </Card>
+
+
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Language Settings</CardTitle>
+                                        <CardDescription>
+                                            Choose your source and target languages
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="grid gap-4">
+                                        <div className="grid grid-cols-2 gap-4">
+
+                                            <FormField
+                                                control={form.control}
+                                                name="sourceLanguage"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Source Language</FormLabel>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            defaultValue={field.value}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select language" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="en">English</SelectItem>
+                                                                <SelectItem value="es">Spanish</SelectItem>
+                                                                <SelectItem value="fr">French</SelectItem>
+                                                                <SelectItem value="it">Italian</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="targetLanguage"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Target Language</FormLabel>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            defaultValue={field.value}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select language" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="en">English</SelectItem>
+                                                                <SelectItem value="es">Spanish</SelectItem>
+                                                                <SelectItem value="fr">French</SelectItem>
+                                                                <SelectItem value="it">Italian</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Word Categories</CardTitle>
+                                        <CardDescription>
+                                            Categories are used to filter the words in the game. You can add more categories by searching for them.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <FormField
+                                            control={form.control}
+                                            name="categories"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <CategoryCombobox
+                                                            selected={field.value}
+                                                            onChange={field.onChange}
+                                                            onSearch={searchCategories}
+                                                        />
+                                                    </FormControl>
                                                     <FormDescription>
-                                                        Enable multiple choice answers instead of text input
+                                                        Search and select multiple categories
                                                     </FormDescription>
-                                                </div>
-                                                <FormControl>
-                                                    <Switch
-                                                        checked={field.value === 'multiple-choice'}
-                                                        onCheckedChange={(checked) =>
-                                                            field.onChange(checked ? 'multiple-choice' : 'single-choice')
-                                                        }
-                                                    />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </CardContent>
-                            </Card>
-
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Language Settings</CardTitle>
-                                    <CardDescription>
-                                        Choose your source and target languages
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="grid gap-4">
-                                    <div className="grid grid-cols-2 gap-4">
-
-                                        <FormField
-                                            control={form.control}
-                                            name="sourceLanguage"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Source Language</FormLabel>
-                                                    <Select
-                                                        onValueChange={field.onChange}
-                                                        defaultValue={field.value}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select language" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="en">English</SelectItem>
-                                                            <SelectItem value="es">Spanish</SelectItem>
-                                                            <SelectItem value="fr">French</SelectItem>
-                                                            <SelectItem value="it">Italian</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="targetLanguage"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Target Language</FormLabel>
-                                                    <Select
-                                                        onValueChange={field.onChange}
-                                                        defaultValue={field.value}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Select language" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="en">English</SelectItem>
-                                                            <SelectItem value="es">Spanish</SelectItem>
-                                                            <SelectItem value="fr">French</SelectItem>
-                                                            <SelectItem value="it">Italian</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Word Categories</CardTitle>
-                                    <CardDescription>
-                                        Categories are used to filter the words in the game. You can add more categories by searching for them.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <FormField
-                                        control={form.control}
-                                        name="categories"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <CategoryCombobox
-                                                        selected={field.value}
-                                                        onChange={field.onChange}
-                                                        onSearch={searchCategories}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    Search and select multiple categories
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </div>
-                        <AlertDialogFooter className="flex items-center">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={() => setOpen(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit">
-                                Save Changes
-                            </Button>
-                        </AlertDialogFooter>
-                    </form>
-                </Form>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                            <AlertDialogFooter className="flex items-center">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => setOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button type="submit">
+                                    Save Changes
+                                </Button>
+                            </AlertDialogFooter>
+                        </form>
+                    </Form>
             </AlertDialogContent>
         </AlertDialog>
     )
